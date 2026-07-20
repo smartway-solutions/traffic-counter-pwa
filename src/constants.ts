@@ -1,10 +1,16 @@
-import type { IStoredState, TVehicleCounts } from "./types.ts";
+import type { IFeedbackSettings, IStoredState, TVehicleCounts } from "./types.ts";
 import { VEHICLE_TYPES } from "./types.ts";
 
 export const STORAGE_KEY = "traffic-counter-pwa:v1";
 
 /** 單人單日作業上限：超過即拒絕新增，提示先匯出並清除。 */
 export const MAX_RECORD_COUNT = 10_000;
+
+export const DEFAULT_FEEDBACK_SETTINGS: IFeedbackSettings = {
+  increase: { vibration: "light", sound: "off" },
+  decrease: { vibration: "light", sound: "off" },
+  negativeError: { vibration: "light", sound: "warning" }
+};
 
 export function createEmptyCounts(): TVehicleCounts {
   return Object.fromEntries(VEHICLE_TYPES.map((type) => [type, 0])) as TVehicleCounts;
@@ -15,6 +21,7 @@ export function createInitialState(): IStoredState {
     roadSection: "",
     userName: "",
     theme: "default",
+    feedbackSettings: structuredClone(DEFAULT_FEEDBACK_SETTINGS),
     counts: createEmptyCounts(),
     records: []
   };

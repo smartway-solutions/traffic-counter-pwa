@@ -1,7 +1,9 @@
 import { Box, Paper, Tab, Tabs } from "@mui/material";
 import {
-  AllCommunityModule,
+  ClientSideRowModelModule,
+  CsvExportModule,
   ModuleRegistry,
+  PaginationModule,
   themeQuartz,
   type GridApi,
   type GridReadyEvent
@@ -11,7 +13,7 @@ import { useEffect, useRef, type SyntheticEvent } from "react";
 import type { IAggregateRow, ICountRecord, IStatisticsRow } from "../types.ts";
 import { AGGREGATE_COLUMNS, DEFAULT_COL_DEF, RAW_COLUMNS, STATISTICS_COLUMNS } from "./gridColumns.ts";
 
-ModuleRegistry.registerModules([AllCommunityModule]);
+ModuleRegistry.registerModules([ClientSideRowModelModule, CsvExportModule, PaginationModule]);
 
 export type TGridView = "raw" | "aggregate" | "statistics";
 

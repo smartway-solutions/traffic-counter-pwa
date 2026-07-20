@@ -9,6 +9,9 @@ export const VEHICLE_TYPES = [
 
 export type TVehicleType = (typeof VEHICLE_TYPES)[number];
 export type TCountAction = "increase" | "decrease";
+export type TFeedbackEvent = "increase" | "decrease" | "negativeError";
+export type TVibrationLevel = "off" | "light" | "medium" | "strong";
+export type TSoundEffect = "off" | "click" | "beep" | "chime" | "warning";
 
 export interface IGpsSnapshot {
   latitude: number;
@@ -29,14 +32,36 @@ export interface ICountRecord {
   userName: string;
 }
 
+export interface IFeedbackEventConfig {
+  vibration: TVibrationLevel;
+  sound: TSoundEffect;
+}
+
+export interface IFeedbackSettings {
+  increase: IFeedbackEventConfig;
+  decrease: IFeedbackEventConfig;
+  negativeError: IFeedbackEventConfig;
+}
+
 export type TVehicleCounts = Record<TVehicleType, number>;
 
-export type TThemeName = "default" | "dark" | "list";
+export type TThemeName =
+  | "default"
+  | "dark"
+  | "list"
+  | "field"
+  | "ocean"
+  | "sunset"
+  | "mono"
+  | "neon"
+  | "mosaic"
+  | "keypad";
 
 export interface IStoredState {
   roadSection: string;
   userName: string;
   theme: TThemeName;
+  feedbackSettings: IFeedbackSettings;
   counts: TVehicleCounts;
   records: ICountRecord[];
 }

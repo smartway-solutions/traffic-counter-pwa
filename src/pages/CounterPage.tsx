@@ -13,10 +13,15 @@ import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { useAppContext } from "../appContext.ts";
 import { CounterCard } from "../components/CounterCard.tsx";
+import { CounterGrid } from "../components/CounterGrid.tsx";
 import { CounterHeader } from "../components/CounterHeader.tsx";
 import { ThemeDialog } from "../components/ThemeDialog.tsx";
 import { createInitialState, MAX_RECORD_COUNT } from "../constants.ts";
-import { getCounterLayout, isDarkTheme } from "../themes.ts";
+import { triggerFeedback } from "../feedback.ts";
+import {
+  getCounterCardVariant,
+  getCounterLayout
+} from "../themes.ts";
 import type { ICountRecord, TCountAction, TThemeName, TVehicleType } from "../types.ts";
 import { VEHICLE_TYPES } from "../types.ts";
 
@@ -44,7 +49,6 @@ export function CounterPage(): React.JSX.Element {
   const [themeDialogOpen, setThemeDialogOpen] = useState(false);
   const feedbackTimer = useRef<number | null>(null);
   const layout = getCounterLayout(state.theme);
-  const dark = isDarkTheme(state.theme);
 
   function selectTheme(theme: TThemeName): void {
     setState((previous) => ({ ...previous, theme }));
@@ -64,8 +68,10 @@ export function CounterPage(): React.JSX.Element {
       setWarning(`已達單日上限 ${MAX_RECORD_COUNT.toLocaleString()} 筆，請先匯出並清除本機資料`);
       return;
     }
+
     const currentCount = state.counts[vehicleType];
     if (action === "decrease" && currentCount === 0) {
+      void triggerFeedback(state.feedbackSettings.negativeError);
       setWarning(`${vehicleType}已是 0，不能再減少`);
       return;
     }
@@ -90,6 +96,9 @@ export function CounterPage(): React.JSX.Element {
       counts: { ...previous.counts, [vehicleType]: currentCount + delta },
       records: [...previous.records, record]
     }));
+    void triggerFeedback(
+      action === "increase" ? state.feedbackSettings.increase : state.feedbackSettings.decrease
+    );
     flash(vehicleType, action);
   }
 
@@ -100,47 +109,44 @@ export function CounterPage(): React.JSX.Element {
   }
 
   return (
-    <Box sx={{ height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <Box
+      sx={{
+        height: "100dvh",
+        minHeight: "100dvh",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        bgcolor: "background.default"
+      }}
+    >
       <CounterHeader
         roadSection={state.roadSection}
         userName={state.userName}
         currentTime={currentTime}
         geolocation={geolocation}
+        themeName={state.theme}
         onExport={() => navigate("/export")}
         onEditSetup={() => navigate("/setup")}
+        onFeedbackSettings={() => navigate("/feedback")}
         onManual={() => navigate("/manual")}
         onThemeRequest={() => setThemeDialogOpen(true)}
         onClearRequest={() => setClearDialogOpen(true)}
       />
 
-      <Box
-        sx={
-          layout === "list"
-            ? { flex: 1, minHeight: 0, display: "flex", flexDirection: "column", gap: 0.75, p: 1 }
-            : {
-                flex: 1,
-                minHeight: 0,
-                display: "grid",
-                gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", sm: "repeat(3, minmax(0, 1fr))" },
-                gridAutoRows: "minmax(0, 1fr)",
-                gap: 1,
-                p: 1
-              }
-        }
-      >
-        {VEHICLE_TYPES.map((vehicleType) => (
+      <CounterGrid layout={layout}>
+        {VEHICLE_TYPES.map((vehicleType, index) => (
           <CounterCard
             key={vehicleType}
             vehicleType={vehicleType}
             count={state.counts[vehicleType]}
             feedback={feedback?.vehicleType === vehicleType ? feedback.action : null}
-            variant={layout}
-            dark={dark}
+            variant={getCounterCardVariant(state.theme, index)}
+            themeName={state.theme}
             onIncrease={() => count(vehicleType, "increase")}
             onDecrease={() => count(vehicleType, "decrease")}
           />
         ))}
-      </Box>
+      </CounterGrid>
 
       <ThemeDialog
         open={themeDialogOpen}
@@ -154,20 +160,21 @@ export function CounterPage(): React.JSX.Element {
         autoHideDuration={2000}
         onClose={() => setWarning(null)}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        sx={{ mb: "max(8px, env(safe-area-inset-bottom))" }}
       >
         <Alert severity="warning" variant="filled" onClose={() => setWarning(null)}>
           {warning}
         </Alert>
       </Snackbar>
 
-      <Dialog open={clearDialogOpen} onClose={() => setClearDialogOpen(false)}>
+      <Dialog open={clearDialogOpen} onClose={() => setClearDialogOpen(false)} fullWidth maxWidth="xs">
         <DialogTitle>清除本機資料？</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            這會刪除路段、使用者、六種車輛合計與所有操作紀錄，且無法復原。建議先匯出 CSV。
+            這會刪除路段、使用者、震動與音效設定、六種車輛合計與所有操作紀錄，且無法復原。建議先匯出 CSV。
           </DialogContentText>
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ pb: "max(12px, env(safe-area-inset-bottom))" }}>
           <Button onClick={() => setClearDialogOpen(false)}>取消</Button>
           <Button color="error" variant="contained" onClick={clearAllData}>
             確認清除

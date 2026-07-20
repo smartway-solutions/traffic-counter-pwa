@@ -1,30 +1,21 @@
-# CounterPage 規格（`#/`，主畫面）
+# CounterPage 規格（`#/`）
 
 ## 目的
-手持手機、單手快速計數的主畫面。**整頁不捲動**：`100dvh` + `overflow: hidden`，
-頂欄之外的高度由六個 `CounterRow` flex 均分。
+手機優先、快速人工計數；整頁固定 `100dvh`。
 
-## 版面
-- 頂欄：`CounterHeader`（路段／使用者為純文字、GPS 燈號、漢堡選單）。
-- 內容：六張 `CounterCard`，版面依主題（`getCounterLayout`）切換——
-  grid 主題為**直向 2×3、寬螢幕（sm+）3×2**；清單大字主題為單欄六列 flex 均分。
-  每車種一組專屬配色，名稱靠左、大數字靠右，點整卡 +1、「−」鈕 −1。
-- 「更改主題」由選單開 `ThemeDialog`，選擇寫入 `state.theme` 立即生效。
-- **不顯示統計**（合計、GPS 完整率等只在匯出頁出現）。
+## 布局
+- 經典：2×3／橫向 3×2。
+- 清單：1×6。
+- 非對稱資訊牆：2 張全寬＋4 張雙欄。
+- 錯位鍵盤：2－3－1。
+
+## 響應式工學
+- `max-width: 370px` 或 `max-height: 680px`：縮小 gap／padding。
+- 主要觸控目標至少 44px，底部內容處理 safe-area。
 
 ## 計數規則
-- 進入本頁前守衛已確保路段／使用者已填寫，計數時不再檢查。
-- 每次操作寫入一筆 `ICountRecord`（含 ISO 時間、當下 GPS 快照、路段、使用者快照）。
-- 減少：計數為 0 時拒絕並顯示警告 Snackbar。
-- **上限 `MAX_RECORD_COUNT`（10,000 筆，單人單日規模）**：達上限拒絕新增，
-  提示先匯出並清除。
-- GPS 不可用時**仍可計數**，該筆 `gps: null`；狀態僅由燈號呈現，無互動、不彈窗。
+每次成功操作新增不可變 `ICountRecord`，包含時間、GPS、路段與使用者快照；最多 10,000 筆。
 
-## 回饋
-- 主要回饋是 `CounterCard` 整卡閃色（+1 該車種主色／−1 紅）＋數字放大，260ms 後清除；
-  快速連點時重置計時器。
-- Snackbar 只用於警告（0 下限、10,000 上限），不在每次成功計數時彈出以免干擾連點。
-
-## 選單動作
-- 匯出與統計 → `#/export`；編輯路段／使用者 → `#/setup`；
-- 清除本機資料 → 確認 Dialog → 還原初始狀態並導向 `#/setup`。
+- 增加成功：套用 `feedbackSettings.increase`。
+- 減少成功：套用 `feedbackSettings.decrease`。
+- 目前為 0 仍減少：不寫入紀錄，套用 `feedbackSettings.negativeError` 並顯示警告。

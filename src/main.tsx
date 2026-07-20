@@ -3,9 +3,6 @@ import { createRoot } from "react-dom/client";
 import { RouterProvider, createHashRouter } from "react-router";
 import { RootLayout } from "./RootLayout.tsx";
 import { CounterPage } from "./pages/CounterPage.tsx";
-import { ExportPage } from "./pages/ExportPage.tsx";
-import { ManualPage } from "./pages/ManualPage.tsx";
-import { SetupPage } from "./pages/SetupPage.tsx";
 
 const router = createHashRouter([
   {
@@ -13,9 +10,22 @@ const router = createHashRouter([
     element: <RootLayout />,
     children: [
       { index: true, element: <CounterPage /> },
-      { path: "setup", element: <SetupPage /> },
-      { path: "export", element: <ExportPage /> },
-      { path: "manual", element: <ManualPage /> }
+      {
+        path: "setup",
+        lazy: () => import("./pages/SetupPage.tsx").then(({ SetupPage: Component }) => ({ Component }))
+      },
+      {
+        path: "export",
+        lazy: () => import("./pages/ExportPage.tsx").then(({ ExportPage: Component }) => ({ Component }))
+      },
+      {
+        path: "feedback",
+        lazy: () => import("./pages/FeedbackSettingsPage.tsx").then(({ FeedbackSettingsPage: Component }) => ({ Component }))
+      },
+      {
+        path: "manual",
+        lazy: () => import("./pages/ManualPage.tsx").then(({ ManualPage: Component }) => ({ Component }))
+      }
     ]
   }
 ]);
