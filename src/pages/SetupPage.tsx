@@ -42,7 +42,7 @@ export function SetupPage(): React.JSX.Element {
   }
 
   return (
-    <Box sx={{ height: "100dvh", display: "grid", placeItems: "center", bgcolor: "#f5f7fb" }}>
+    <Box sx={{ height: "100dvh", display: "grid", placeItems: "center", bgcolor: "background.default" }}>
       <Typography variant="h6" fontWeight={900} color="text.secondary">
         手機交通量計數器
       </Typography>

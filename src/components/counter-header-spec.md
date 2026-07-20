@@ -13,7 +13,8 @@
 1. 匯出與統計 → `onExport`（導向 `#/export`；統計只在匯出頁顯示）。
 2. 編輯路段／使用者 → `onEditSetup`（導向 `#/setup`，編輯模式可取消）。
 3. 使用手冊 → `onManual`（導向 `#/manual`）。
-4. **清除本機資料** → `onClearRequest`（紅字；由父層開確認 Dialog）。
+4. 更改主題 → `onThemeRequest`（由父層開 `ThemeDialog`）。
+5. **清除本機資料** → `onClearRequest`（紅字；由父層開確認 Dialog）。
 
 任一項點擊後先關閉選單再執行回呼。
 

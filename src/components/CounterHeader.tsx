@@ -3,6 +3,7 @@ import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import FileDownloadRoundedIcon from "@mui/icons-material/FileDownloadRounded";
 import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
+import PaletteRoundedIcon from "@mui/icons-material/PaletteRounded";
 import { AppBar, IconButton, Menu, MenuItem, Stack, Toolbar, Typography } from "@mui/material";
 import { useState, type MouseEvent } from "react";
 import type { IGeolocationState } from "../hooks/useGeolocation.ts";
@@ -16,6 +17,7 @@ export interface ICounterHeaderProps {
   onExport: () => void;
   onEditSetup: () => void;
   onManual: () => void;
+  onThemeRequest: () => void;
   onClearRequest: () => void;
 }
 
@@ -67,6 +69,10 @@ export function CounterHeader(props: ICounterHeaderProps): React.JSX.Element {
         <MenuItem onClick={() => pick(props.onManual)}>
           <MenuBookRoundedIcon fontSize="small" sx={{ mr: 1 }} />
           使用手冊
+        </MenuItem>
+        <MenuItem onClick={() => pick(props.onThemeRequest)}>
+          <PaletteRoundedIcon fontSize="small" sx={{ mr: 1 }} />
+          更改主題
         </MenuItem>
         <MenuItem onClick={() => pick(props.onClearRequest)} sx={{ color: "error.main" }}>
           <DeleteForeverRoundedIcon fontSize="small" sx={{ mr: 1 }} />

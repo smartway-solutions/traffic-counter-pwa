@@ -14,8 +14,10 @@ import { useNavigate } from "react-router";
 import { useAppContext } from "../appContext.ts";
 import { CounterCard } from "../components/CounterCard.tsx";
 import { CounterHeader } from "../components/CounterHeader.tsx";
+import { ThemeDialog } from "../components/ThemeDialog.tsx";
 import { createInitialState, MAX_RECORD_COUNT } from "../constants.ts";
-import type { ICountRecord, TCountAction, TVehicleType } from "../types.ts";
+import { getCounterLayout, isDarkTheme } from "../themes.ts";
+import type { ICountRecord, TCountAction, TThemeName, TVehicleType } from "../types.ts";
 import { VEHICLE_TYPES } from "../types.ts";
 
 interface IFeedbackState {
@@ -39,7 +41,15 @@ export function CounterPage(): React.JSX.Element {
   const [feedback, setFeedback] = useState<IFeedbackState | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
   const [clearDialogOpen, setClearDialogOpen] = useState(false);
+  const [themeDialogOpen, setThemeDialogOpen] = useState(false);
   const feedbackTimer = useRef<number | null>(null);
+  const layout = getCounterLayout(state.theme);
+  const dark = isDarkTheme(state.theme);
+
+  function selectTheme(theme: TThemeName): void {
+    setState((previous) => ({ ...previous, theme }));
+    setThemeDialogOpen(false);
+  }
 
   function flash(vehicleType: TVehicleType, action: TCountAction): void {
     if (feedbackTimer.current !== null) {
@@ -99,19 +109,24 @@ export function CounterPage(): React.JSX.Element {
         onExport={() => navigate("/export")}
         onEditSetup={() => navigate("/setup")}
         onManual={() => navigate("/manual")}
+        onThemeRequest={() => setThemeDialogOpen(true)}
         onClearRequest={() => setClearDialogOpen(true)}
       />
 
       <Box
-        sx={{
-          flex: 1,
-          minHeight: 0,
-          display: "grid",
-          gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", sm: "repeat(3, minmax(0, 1fr))" },
-          gridAutoRows: "minmax(0, 1fr)",
-          gap: 1,
-          p: 1
-        }}
+        sx={
+          layout === "list"
+            ? { flex: 1, minHeight: 0, display: "flex", flexDirection: "column", gap: 0.75, p: 1 }
+            : {
+                flex: 1,
+                minHeight: 0,
+                display: "grid",
+                gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", sm: "repeat(3, minmax(0, 1fr))" },
+                gridAutoRows: "minmax(0, 1fr)",
+                gap: 1,
+                p: 1
+              }
+        }
       >
         {VEHICLE_TYPES.map((vehicleType) => (
           <CounterCard
@@ -119,11 +134,20 @@ export function CounterPage(): React.JSX.Element {
             vehicleType={vehicleType}
             count={state.counts[vehicleType]}
             feedback={feedback?.vehicleType === vehicleType ? feedback.action : null}
+            variant={layout}
+            dark={dark}
             onIncrease={() => count(vehicleType, "increase")}
             onDecrease={() => count(vehicleType, "decrease")}
           />
         ))}
       </Box>
+
+      <ThemeDialog
+        open={themeDialogOpen}
+        current={state.theme}
+        onClose={() => setThemeDialogOpen(false)}
+        onSelect={selectTheme}
+      />
 
       <Snackbar
         open={warning !== null}
