@@ -14,6 +14,7 @@ export function createInitialState(): IStoredState {
   return {
     roadSection: "",
     userName: "",
+    theme: "default",
     counts: createEmptyCounts(),
     records: []
   };

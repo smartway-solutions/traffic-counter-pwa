@@ -31,9 +31,12 @@ export interface ICountRecord {
 
 export type TVehicleCounts = Record<TVehicleType, number>;
 
+export type TThemeName = "default" | "dark" | "list";
+
 export interface IStoredState {
   roadSection: string;
   userName: string;
+  theme: TThemeName;
   counts: TVehicleCounts;
   records: ICountRecord[];
 }

@@ -9,7 +9,8 @@ function readStoredState(): IStoredState {
   }
 
   try {
-    return JSON.parse(raw) as IStoredState;
+    // 以初始狀態墊底合併，讓舊版資料（缺 theme 等新欄位）自動補齊預設值
+    return { ...createInitialState(), ...(JSON.parse(raw) as Partial<IStoredState>) };
   } catch (error) {
     throw new Error(
       `LocalStorage 資料損毀，請在瀏覽器開發者工具刪除鍵值 ${STORAGE_KEY} 後重新整理。`,

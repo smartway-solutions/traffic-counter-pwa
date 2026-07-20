@@ -1,4 +1,3 @@
-import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider, createHashRouter } from "react-router";
@@ -7,24 +6,6 @@ import { CounterPage } from "./pages/CounterPage.tsx";
 import { ExportPage } from "./pages/ExportPage.tsx";
 import { ManualPage } from "./pages/ManualPage.tsx";
 import { SetupPage } from "./pages/SetupPage.tsx";
-
-const theme = createTheme({
-  palette: {
-    mode: "light",
-    primary: { main: "#0b57d0" },
-    text: { primary: "#111111" },
-    background: { default: "#ffffff", paper: "#ffffff" }
-  },
-  shape: { borderRadius: 14 },
-  typography: {
-    fontFamily: 'Inter, "Noto Sans TC", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-    button: { textTransform: "none" }
-  },
-  components: {
-    MuiButton: { defaultProps: { disableElevation: true } },
-    MuiCard: { styleOverrides: { root: { backgroundImage: "none" } } }
-  }
-});
 
 const router = createHashRouter([
   {
@@ -46,9 +27,6 @@ if (rootElement === null) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <RouterProvider router={router} />
-    </ThemeProvider>
+    <RouterProvider router={router} />
   </StrictMode>
 );

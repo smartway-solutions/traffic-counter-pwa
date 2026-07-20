@@ -16,5 +16,9 @@ Hash 路由的根層：持有全域狀態（LocalStorage 持久化狀態、GPS w
 | `geolocation` | GPS 狀態（status / message / position 快照） |
 | `currentTime` | 每秒更新的本地時間字串 |
 
+## 主題
+- 依 `state.theme` 以 `buildMuiTheme` 建立 MUI Theme，
+  ThemeProvider＋CssBaseline 包住整個 Outlet（含 Navigate 分支）。
+
 ## 限制
-- 不渲染任何 UI，只做守衛與 context 供應，保持檔案精簡。
+- 除 ThemeProvider 外不渲染任何 UI，只做守衛與 context 供應，保持檔案精簡。
