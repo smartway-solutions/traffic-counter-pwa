@@ -98,6 +98,7 @@ export function CounterPage(): React.JSX.Element {
         geolocation={geolocation}
         onExport={() => navigate("/export")}
         onEditSetup={() => navigate("/setup")}
+        onManual={() => navigate("/manual")}
         onClearRequest={() => setClearDialogOpen(true)}
       />
 

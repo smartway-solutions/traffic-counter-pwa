@@ -5,6 +5,7 @@ import { RouterProvider, createHashRouter } from "react-router";
 import { RootLayout } from "./RootLayout.tsx";
 import { CounterPage } from "./pages/CounterPage.tsx";
 import { ExportPage } from "./pages/ExportPage.tsx";
+import { ManualPage } from "./pages/ManualPage.tsx";
 import { SetupPage } from "./pages/SetupPage.tsx";
 
 const theme = createTheme({
@@ -32,7 +33,8 @@ const router = createHashRouter([
     children: [
       { index: true, element: <CounterPage /> },
       { path: "setup", element: <SetupPage /> },
-      { path: "export", element: <ExportPage /> }
+      { path: "export", element: <ExportPage /> },
+      { path: "manual", element: <ManualPage /> }
     ]
   }
 ]);
