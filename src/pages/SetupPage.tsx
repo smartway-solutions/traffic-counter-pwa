@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { useState, type ChangeEvent } from "react";
 import { useNavigate } from "react-router";
-import { useAppContext } from "../appContext.ts";
+import { isSetupComplete, useAppContext } from "../appContext.ts";
 import { BrandNotice } from "../components/BrandNotice.tsx";
 
 export function SetupPage(): React.JSX.Element {
@@ -21,7 +21,13 @@ export function SetupPage(): React.JSX.Element {
   const [roadSection, setRoadSection] = useState(state.roadSection);
   const [userName, setUserName] = useState(state.userName);
 
+  // 已完成初始設定＝從選單進來的「編輯」模式，可取消返回；否則為強制初始設定
+  const isEditing = isSetupComplete(state);
   const canSave = roadSection.trim() !== "" && userName.trim() !== "";
+
+  function cancel(): void {
+    navigate("/", { replace: true });
+  }
 
   function save(): void {
     if (!canSave) {
@@ -41,11 +47,19 @@ export function SetupPage(): React.JSX.Element {
         手機交通量計數器
       </Typography>
 
-      <Dialog open fullWidth maxWidth="xs" disableEscapeKeyDown>
-        <DialogTitle fontWeight={900}>作業設定</DialogTitle>
+      <Dialog
+        open
+        fullWidth
+        maxWidth="xs"
+        disableEscapeKeyDown={!isEditing}
+        onClose={isEditing ? cancel : undefined}
+      >
+        <DialogTitle fontWeight={900}>{isEditing ? "編輯路段／使用者" : "作業設定"}</DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ mb: 2 }}>
-            填寫路段與使用者後才能進入計數畫面；之後會以純文字顯示在頂欄，可從選單重新編輯。
+            {isEditing
+              ? "修改後儲存，或取消返回計數畫面。"
+              : "填寫路段與使用者後才能進入計數畫面；之後會以純文字顯示在頂欄，可從選單重新編輯。"}
           </DialogContentText>
           <Stack spacing={2}>
             <TextField
@@ -73,9 +87,20 @@ export function SetupPage(): React.JSX.Element {
           </Stack>
           <BrandNotice />
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button variant="contained" size="large" fullWidth disabled={!canSave} onClick={save}>
-            開始計數
+        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+          {isEditing && (
+            <Button size="large" onClick={cancel}>
+              取消
+            </Button>
+          )}
+          <Button
+            variant="contained"
+            size="large"
+            fullWidth={!isEditing}
+            disabled={!canSave}
+            onClick={save}
+          >
+            {isEditing ? "儲存" : "開始計數"}
           </Button>
         </DialogActions>
       </Dialog>
