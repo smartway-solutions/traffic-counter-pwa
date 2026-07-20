@@ -1,5 +1,5 @@
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
-import { AppBar, Box, IconButton, Paper, Stack, Toolbar, Typography } from "@mui/material";
+import { Alert, AppBar, Box, IconButton, Paper, Stack, Toolbar, Typography } from "@mui/material";
 import { useNavigate } from "react-router";
 
 interface IManualSection {
@@ -37,6 +37,13 @@ const MANUAL_SECTIONS: IManualSection[] = [
     description:
       "在匯出頁的表格點欄位標題即可排序：點一下遞增、再點一下遞減、第三下取消排序。範例為依「操作後計數」排序原始資料。",
     media: "sort.mp4"
+  },
+  {
+    id: "move-column",
+    title: "表格操作：移動欄位",
+    description:
+      "按住欄位標題並在標題列內左右拖曳，即可調整欄位順序。範例將「變動」欄拖到「操作」欄前面。",
+    media: "move-column.mp4"
   },
   {
     id: "hide-column",
@@ -79,6 +86,10 @@ export function ManualPage(): React.JSX.Element {
 
       <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", overscrollBehavior: "contain" }}>
         <Stack spacing={2} sx={{ maxWidth: 480, mx: "auto", p: 2 }}>
+          <Alert severity="info">
+            教學影片不納入離線快取：離線使用 App 時本頁影片無法播放，屬正常現象，
+            連上網路後即可觀看。
+          </Alert>
           {MANUAL_SECTIONS.map((section, index) => (
             <Paper
               key={section.id}

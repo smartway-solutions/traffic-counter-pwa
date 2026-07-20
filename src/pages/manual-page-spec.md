@@ -15,16 +15,18 @@
   操作示範使用「博愛路＋王小明」假資料）。
 - `<video autoplay loop muted playsinline controls preload="metadata">`。
 - **不納入 PWA 預快取**：vite.config workbox `globIgnores: ["manual/**"]`，
-  避免大型媒體佔用離線快取；離線時本頁影片可能無法播放，屬預期行為。
+  避免大型媒體佔用離線快取；離線時本頁影片無法播放，屬預期行為，
+  **內容區頂端有 info Alert 明確告知使用者**。
 
 ## 章節（與 `public/manual/` 檔案一一對應）
 1. `setup.mp4` 初次進入：作業設定（強制填寫）
 2. `count.mp4` 計數 +／−（含 0 下限提示）
 3. `export.mp4` 匯出 CSV（含確認 Dialog）
 4. `sort.mp4` 表格排序（點欄標題循環：遞增→遞減→取消）
-5. `hide-column.mp4` 隱藏欄位（拖曳欄標題到表格外）
-6. `edit.mp4` 編輯路段／使用者（可取消）
-7. `clear.mp4` 清除本機資料（確認後回作業設定）
+5. `move-column.mp4` 移動欄位（標題列內左右拖曳調整欄序）
+6. `hide-column.mp4` 隱藏欄位（拖曳欄標題到表格外）
+7. `edit.mp4` 編輯路段／使用者（可取消）
+8. `clear.mp4` 清除本機資料（確認後回作業設定）
 
 ## 進入方式
 主畫面右上「更多」選單 →「使用手冊」；由 `RootLayout` 守衛，未完成設定前不可達。
