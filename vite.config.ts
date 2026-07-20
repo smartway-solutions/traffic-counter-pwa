@@ -32,6 +32,8 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
+        // 使用手冊的教學影片／圖片體積大，不納入 PWA 預快取，改由網路載入
+        globIgnores: ["manual/**"],
         navigateFallback: "index.html"
       }
     })
