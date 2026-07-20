@@ -25,6 +25,10 @@ const router = createHashRouter([
       {
         path: "manual",
         lazy: () => import("./pages/ManualPage.tsx").then(({ ManualPage: Component }) => ({ Component }))
+      },
+      {
+        path: "changelog",
+        lazy: () => import("./pages/ChangelogPage.tsx").then(({ ChangelogPage: Component }) => ({ Component }))
       }
     ]
   }

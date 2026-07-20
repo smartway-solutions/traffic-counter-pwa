@@ -129,6 +129,7 @@ export function CounterPage(): React.JSX.Element {
         onEditSetup={() => navigate("/setup")}
         onFeedbackSettings={() => navigate("/feedback")}
         onManual={() => navigate("/manual")}
+        onChangelog={() => navigate("/changelog")}
         onThemeRequest={() => setThemeDialogOpen(true)}
         onClearRequest={() => setClearDialogOpen(true)}
       />

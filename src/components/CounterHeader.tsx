@@ -1,6 +1,7 @@
 import DeleteForeverRoundedIcon from "@mui/icons-material/DeleteForeverRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import FileDownloadRoundedIcon from "@mui/icons-material/FileDownloadRounded";
+import HistoryRoundedIcon from "@mui/icons-material/HistoryRounded";
 import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import NotificationsActiveRoundedIcon from "@mui/icons-material/NotificationsActiveRounded";
@@ -22,6 +23,7 @@ export interface ICounterHeaderProps {
   onEditSetup: () => void;
   onFeedbackSettings: () => void;
   onManual: () => void;
+  onChangelog: () => void;
   onThemeRequest: () => void;
   onClearRequest: () => void;
 }
@@ -122,6 +124,10 @@ export function CounterHeader(props: ICounterHeaderProps): React.JSX.Element {
         <MenuItem onClick={() => pick(props.onManual)} sx={{ minHeight: 48 }}>
           <MenuBookRoundedIcon fontSize="small" sx={{ mr: 1.25 }} />
           使用手冊
+        </MenuItem>
+        <MenuItem onClick={() => pick(props.onChangelog)} sx={{ minHeight: 48 }}>
+          <HistoryRoundedIcon fontSize="small" sx={{ mr: 1.25 }} />
+          版本變更說明
         </MenuItem>
         <MenuItem onClick={() => pick(props.onThemeRequest)} sx={{ minHeight: 48 }}>
           <PaletteRoundedIcon fontSize="small" sx={{ mr: 1.25 }} />
