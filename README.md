@@ -2,6 +2,9 @@
 
 Vite + React + TypeScript + React Router 7（hash 路由）+ Material UI + AG Grid Community + LocalStorage。
 
+**線上 DEMO**：<https://smartway-solutions.github.io/traffic-counter-pwa/>
+（push `main` 後由 GitHub Actions 自動建置部署）
+
 ## 路由（`createHashRouter`）
 
 | 路徑 | 頁面 | 說明 |
