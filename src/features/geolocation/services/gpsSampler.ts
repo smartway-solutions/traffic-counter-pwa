@@ -96,7 +96,6 @@ export function startGpsSampler(setState: TGpsStateListener): () => void {
   function requestCurrentWindow(nowMs: number): void {
     const windowKey = getGpsSampleWindowKey(nowMs);
     if (
-      windowKey === null ||
       windowKey === lastRequestedWindowKey ||
       requestInFlight ||
       document.visibilityState !== "visible"

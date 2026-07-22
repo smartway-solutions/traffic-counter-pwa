@@ -1,41 +1,38 @@
-/** 每分鐘只在前兩個 10 秒視窗取樣，每個視窗最多一次。 */
+/** 每分鐘切成六個固定 10 秒視窗，每個視窗最多取樣一次。 */
 export const GPS_SAMPLE_WINDOW_MS = 10_000;
-export const GPS_ACTIVE_WINDOW_COUNT = 2;
+export const GPS_SAMPLE_WINDOWS_PER_MINUTE = 6;
 export const GPS_SAMPLE_TIMEOUT_MS = 8_000;
 export const GPS_CACHE_MAX_AGE_MS = 70_000;
 
-export type TGpsSampleWindow = 0 | 1;
+export type TGpsSampleWindow = 0 | 1 | 2 | 3 | 4 | 5;
 
 function getMinuteOffset(nowMs: number): number {
   return ((nowMs % 60_000) + 60_000) % 60_000;
 }
 
-export function getGpsSampleWindow(nowMs: number): TGpsSampleWindow | null {
+export function getGpsSampleWindow(nowMs: number): TGpsSampleWindow {
   const offset = getMinuteOffset(nowMs);
-  if (offset <= GPS_SAMPLE_WINDOW_MS) {
-    return 0;
-  }
-  if (offset <= GPS_SAMPLE_WINDOW_MS * GPS_ACTIVE_WINDOW_COUNT) {
-    return 1;
-  }
-  return null;
+  if (offset === 0) return 0;
+  return Math.min(
+    GPS_SAMPLE_WINDOWS_PER_MINUTE - 1,
+    Math.floor((offset - 1) / GPS_SAMPLE_WINDOW_MS)
+  ) as TGpsSampleWindow;
 }
 
-export function getGpsSampleWindowKey(nowMs: number): string | null {
+export function getGpsSampleWindowKey(nowMs: number): string {
   const windowIndex = getGpsSampleWindow(nowMs);
-  if (windowIndex === null) {
-    return null;
-  }
   return `${Math.floor(nowMs / 60_000)}:${windowIndex}`;
 }
 
 /** 回傳下一個可能取樣時間；加 1ms 明確區隔 10.000 與 10.001 秒。 */
 export function getDelayToNextGpsSampleWindow(nowMs: number): number {
   const offset = getMinuteOffset(nowMs);
-  if (offset <= GPS_SAMPLE_WINDOW_MS) {
-    return Math.max(1, GPS_SAMPLE_WINDOW_MS + 1 - offset);
+  const windowIndex = getGpsSampleWindow(nowMs);
+  if (windowIndex === GPS_SAMPLE_WINDOWS_PER_MINUTE - 1) {
+    return Math.max(1, 60_000 - offset);
   }
-  return Math.max(1, 60_000 - offset);
+  const nextWindowStart = (windowIndex + 1) * GPS_SAMPLE_WINDOW_MS + 1;
+  return Math.max(1, nextWindowStart - offset);
 }
 
 export function isGpsSampleFresh(sampledAtMs: number | null, nowMs: number): boolean {
