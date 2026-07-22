@@ -45,8 +45,17 @@
 3. 截圖完成後，把 Save 狀態改為 `completed`，只清除 `workingCounts`。
 4. 截圖失敗則標記 `failed`，不清工作區；Auto Save 失敗時自動關閉開關。
 
+Quick Save 完成截圖下載後顯示 `Quick Save 完成` toast。
+
 截圖 SVG 使用 data URL 載入，避免含 `foreignObject` 的 `blob:` SVG 污染 Canvas 而使 PNG 匯出失敗。
 LocalStorage 寫入失敗也必須結束保存狀態並顯示錯誤；失敗 Save 不作為下一次保存事件數的分界。
 頁面重新載入時，無法接續的 `pending` Save 轉為 `failed`，工作區維持原值。
 
 Save 事件包含 `saveType`、`saveId`、狀態、截圖檔名、保存時工作區 JSON 與本次保存的計數事件數。
+
+## 快速與多點觸控
+
+- 觸控與觸控筆在各卡片分別記錄 `pointerdown`，並在 `pointerup` 仍位於原按鈕範圍時才計數，使不同車種可同時按壓，且不依賴多點觸控結束後可能被瀏覽器取消的合成 `click`。
+- `pointercancel` 或放開位置已離開原按鈕時不得計數，避免手勢取消與滑出造成誤觸。
+- 同一次觸控後產生的相容性 `click` 必須略過，避免單次操作重複計數。
+- 滑鼠與鍵盤仍透過 `click` 計數，維持既有操作與無障礙行為。

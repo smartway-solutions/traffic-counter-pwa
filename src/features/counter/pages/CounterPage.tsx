@@ -13,7 +13,7 @@ import { CounterPageOverlays } from "../components/CounterPageOverlays.tsx";
 import { useCounterController } from "../hooks/useCounterController.ts";
 
 export function CounterPage(): React.JSX.Element {
-  const { state, setState, geolocation, currentTime } = useAppContext();
+  const { state, setState, geolocation } = useAppContext();
   const navigate = useNavigate();
   const captureTargetRef = useRef<HTMLDivElement | null>(null);
   const [clearDialogOpen, setClearDialogOpen] = useState(false);
@@ -72,7 +72,7 @@ export function CounterPage(): React.JSX.Element {
       <CounterHeader
         roadSection={state.roadSection}
         userName={state.userName}
-        currentTime={currentTime}
+        facingDirection={state.facingDirection}
         geolocation={geolocation}
         themeName={state.theme}
         autoSaveEnabled={state.autoSaveEnabled}

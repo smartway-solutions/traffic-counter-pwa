@@ -7,7 +7,6 @@ export interface IAppContext {
   state: IStoredState;
   setState: Dispatch<SetStateAction<IStoredState>>;
   geolocation: IGeolocationState;
-  currentTime: string;
 }
 
 export function useAppContext(): IAppContext {

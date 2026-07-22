@@ -1,7 +1,9 @@
 # CounterHeader 規格
 
-- 顯示標題、即時時間、路段、使用者與 GPS 狀態。
-- Header 提供 `Quick Save`；保存期間按鈕停用，避免重複保存。
+- 不顯示產品標題；第一行左側顯示即時時間、右側顯示使用者，第二行顯示 `面向方向｜路段` 與 GPS 狀態。
+- Header 增加垂直空間；時間維持單行，使用者、方向與路段可換行且不得以省略號截斷。
+- 時鐘在 Header 的獨立子元件內更新，避免每秒更新 App Context 並連帶重新渲染整個頁面。
+- Header 提供只顯示儲存 icon 的 `Quick Save` 按鈕；保存期間按鈕停用，避免重複保存。
 - 漢堡按鈕明確使用主題 AppBar 前景色，避免深淺主題下不可見。
 - 漢堡按鈕開啟右側 Sheet，不使用錨點 Menu。
 - Sheet 由獨立 `CounterActionDrawer` 組件負責，Header 僅呈現頁首布局。

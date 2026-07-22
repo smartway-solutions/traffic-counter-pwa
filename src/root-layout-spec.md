@@ -1,7 +1,7 @@
 # RootLayout 規格
 
 ## 目的
-Hash 路由根層：持有 LocalStorage 狀態、GPS 最近樣本狀態與每秒時鐘，透過 React Router `Outlet` context 傳給各頁。
+Hash 路由根層：持有 LocalStorage 狀態與 GPS 最近樣本狀態，透過 React Router `Outlet` context 傳給各頁。主畫面時鐘由 Header 的獨立子元件管理，避免每秒更新整個路由內容。
 
 ## 路由守衛
 - 路段或使用者未完成，且目前不在 `/setup` 時，導向 `/setup`。
@@ -12,7 +12,6 @@ Hash 路由根層：持有 LocalStorage 狀態、GPS 最近樣本狀態與每秒
 | --- | --- |
 | `state` / `setState` | `IStoredState`，包含主題、震動音效設定、計數與紀錄 |
 | `geolocation` | GPS 狀態與位置快照 |
-| `currentTime` | 每秒更新的本地時間 |
 
 ## 主題
 - 依 `state.theme` 取得預先快取的 10 款 MUI Theme。
