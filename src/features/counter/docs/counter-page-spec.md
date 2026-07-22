@@ -28,7 +28,15 @@
 - 增加成功：套用 `feedbackSettings.increase`。
 - 減少成功：套用 `feedbackSettings.decrease`。
 - 工作區為 0 仍減少：不寫入紀錄，套用 `feedbackSettings.negativeError` 並顯示警告。
-- 計數或儲存時使用最近一次成功定位；若定位已超過 20 秒，事件的 `gps` 為 `null`。按鈕事件不得直接呼叫 Geolocation API。
+- 計數或儲存時使用最近一次成功定位；按鈕事件不得直接呼叫 Geolocation API。
+
+### GPS 不可用時的資料規則
+
+- GPS 是事件的附加資訊，不是計數或儲存成功的必要條件。
+- 最近一次成功定位仍在 20 秒內：新事件附帶當時的 GPS 座標。
+- 定位已超過 20 秒、取樣失敗、權限未允許或裝置不支援：新事件的 `gps` 為 `null`。
+- 無論 GPS 狀態為何，車種數量、增減操作、操作時間、路段、使用者及 Save 資料都必須正常保存；不得阻擋按鈕、回滾計數或刪除事件。
+- GPS 過期只清除記憶體中的最近定位；不得回頭修改已保存事件中的 GPS 或其他資料。
 
 ## Quick Save／Auto Save
 

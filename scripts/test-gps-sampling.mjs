@@ -8,6 +8,11 @@ import {
   isGpsSampleFresh
 } from "../src/features/geolocation/utils/gpsSampling.ts";
 import { GpsSampleStore } from "../src/features/geolocation/services/gpsSampleStore.ts";
+import { createInitialState } from "../src/constants.ts";
+import {
+  createCountRecord,
+  createSaveRecord
+} from "../src/features/counter/utils/counterRecords.ts";
 
 assert.equal(getGpsSampleWindow(0), 0);
 assert.equal(getGpsSampleWindow(10_000), 0);
@@ -64,5 +69,41 @@ samples.set(sample);
 assert.equal(samples.getFresh(1_000 + GPS_SAMPLE_MAX_AGE_MS), sample);
 assert.equal(samples.getFresh(1_001 + GPS_SAMPLE_MAX_AGE_MS), null);
 assert.equal(samples.getLatest(), null);
+
+const storedState = createInitialState();
+storedState.roadSection = "測試路段";
+storedState.userName = "測試員";
+const staleGeolocation = {
+  position: sample.position,
+  sampledAtMs: sample.sampledAtMs,
+  status: "error",
+  message: "GPS 最近樣本已逾時"
+};
+const eventTime = new Date(sample.sampledAtMs + GPS_SAMPLE_MAX_AGE_MS + 1);
+const countRecord = createCountRecord(
+  storedState,
+  staleGeolocation,
+  "機車",
+  "increase",
+  eventTime
+);
+assert.equal(countRecord.gps, null);
+assert.equal(countRecord.eventType, "count");
+assert.equal(countRecord.delta, 1);
+assert.equal(countRecord.countAfter, 1);
+assert.equal(countRecord.roadSection, "測試路段");
+
+const saveRecord = createSaveRecord(
+  storedState,
+  staleGeolocation,
+  "quick_save",
+  "quick-save-test",
+  "quick-save-test.png",
+  eventTime
+);
+assert.equal(saveRecord.gps, null);
+assert.equal(saveRecord.eventType, "save");
+assert.equal(saveRecord.saveStatus, "pending");
+assert.equal(saveRecord.userName, "測試員");
 
 console.log("GPS sampling boundary tests passed.");
