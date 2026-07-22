@@ -1,7 +1,8 @@
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
-import { AppBar, Button, IconButton, Stack, Toolbar, Typography } from "@mui/material";
+import { AppBar, IconButton, Stack, Toolbar, Typography } from "@mui/material";
 import { useState } from "react";
+import { useClock } from "../../../hooks/useClock.ts";
 import type { IGeolocationState } from "../../geolocation/types/gpsTypes.ts";
 import { getAppBarVisual } from "../../../themes.ts";
 import type { TThemeName } from "../../../types.ts";
@@ -12,11 +13,30 @@ export interface ICounterHeaderProps
   extends Omit<ICounterActionDrawerProps, "open" | "onClose"> {
   roadSection: string;
   userName: string;
-  currentTime: string;
+  facingDirection: string;
   geolocation: IGeolocationState;
   themeName: TThemeName;
   quickSaveDisabled: boolean;
   onQuickSave: () => void;
+}
+
+function HeaderClock(): React.JSX.Element {
+  const currentTime = useClock();
+
+  return (
+    <Typography
+      variant="caption"
+      sx={{
+        flexShrink: 0,
+        fontVariantNumeric: "tabular-nums",
+        opacity: 0.82,
+        fontSize: "0.66rem"
+      }}
+      noWrap
+    >
+      {currentTime}
+    </Typography>
+  );
 }
 
 export function CounterHeader(props: ICounterHeaderProps): React.JSX.Element {
@@ -38,56 +58,60 @@ export function CounterHeader(props: ICounterHeaderProps): React.JSX.Element {
         <Toolbar
           variant="dense"
           sx={{
-            pt: "max(4px, env(safe-area-inset-top))",
-            pb: 0.6,
+            pt: "max(8px, env(safe-area-inset-top))",
+            pb: 1,
             pl: "max(8px, env(safe-area-inset-left))",
             pr: "max(8px, env(safe-area-inset-right))",
             gap: 0.65,
-            minHeight: 0
+            minHeight: 64
           }}
         >
-          <Stack sx={{ flex: 1, minWidth: 0 }} spacing={0.15}>
-            <Stack direction="row" alignItems="baseline" spacing={0.75}>
-              <Typography sx={{ fontSize: "0.98rem", fontWeight: 950 }} noWrap>
-                交通量計數器
-              </Typography>
+          <Stack sx={{ flex: 1, minWidth: 0 }} spacing={0.3}>
+            <Stack direction="row" alignItems="baseline" justifyContent="space-between" spacing={0.75}>
+              <HeaderClock />
               <Typography
-                variant="caption"
-                sx={{ fontVariantNumeric: "tabular-nums", opacity: 0.82, fontSize: "0.69rem" }}
-                noWrap
+                sx={{
+                  minWidth: 0,
+                  fontSize: "0.7rem",
+                  fontWeight: 800,
+                  lineHeight: 1.2,
+                  textAlign: "right",
+                  overflowWrap: "anywhere"
+                }}
               >
-                {props.currentTime}
+                {props.userName}
               </Typography>
             </Stack>
             <Stack direction="row" alignItems="center" spacing={0.75}>
               <Typography
-                sx={{ flex: 1, minWidth: 0, fontSize: "0.78rem", fontWeight: 800, opacity: 0.88 }}
-                noWrap
+                sx={{
+                  flex: 1,
+                  minWidth: 0,
+                  fontSize: "0.7rem",
+                  fontWeight: 800,
+                  lineHeight: 1.25,
+                  opacity: 0.88,
+                  overflowWrap: "anywhere"
+                }}
               >
-                {props.roadSection}｜{props.userName}
+                {[props.facingDirection, props.roadSection].filter(Boolean).join("｜")}
               </Typography>
               <GpsStatusLamp status={props.geolocation.status} message={props.geolocation.message} />
             </Stack>
           </Stack>
-          <Button
+          <IconButton
             aria-label="Quick Save"
             disabled={props.quickSaveDisabled}
             onClick={props.onQuickSave}
-            startIcon={<SaveRoundedIcon />}
             sx={{
               flexShrink: 0,
-              minWidth: 0,
-              px: 1,
               color: `${appBar.text} !important`,
               border: `1px solid ${appBar.text}55`,
-              bgcolor: `${appBar.text}12`,
-              fontSize: "0.72rem",
-              fontWeight: 900,
-              whiteSpace: "nowrap"
+              bgcolor: `${appBar.text}12`
             }}
           >
-            Quick Save
-          </Button>
+            <SaveRoundedIcon />
+          </IconButton>
           <IconButton
             aria-label="開啟右側功能面板"
             onClick={() => setSheetOpen(true)}

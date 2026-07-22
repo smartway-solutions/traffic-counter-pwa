@@ -45,6 +45,8 @@
 3. 截圖完成後，把 Save 狀態改為 `completed`，只清除 `workingCounts`。
 4. 截圖失敗則標記 `failed`，不清工作區；Auto Save 失敗時自動關閉開關。
 
+Quick Save 完成截圖下載後顯示 `Quick Save 完成` toast。
+
 截圖 SVG 使用 data URL 載入，避免含 `foreignObject` 的 `blob:` SVG 污染 Canvas 而使 PNG 匯出失敗。
 LocalStorage 寫入失敗也必須結束保存狀態並顯示錯誤；失敗 Save 不作為下一次保存事件數的分界。
 頁面重新載入時，無法接續的 `pending` Save 轉為 `failed`，工作區維持原值。

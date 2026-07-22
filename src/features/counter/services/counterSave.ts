@@ -59,7 +59,10 @@ export async function saveCounterSnapshot(options: ISaveCounterOptions): Promise
     persistStoredState(completedState);
     applyState(completedState);
     return {
-      message: `${saveType === "quick_save" ? "Quick Save" : "Auto Save"} 完成：截圖已下載，主畫面已歸零`,
+      message:
+        saveType === "quick_save"
+          ? "Quick Save 完成"
+          : "Auto Save 完成：截圖已下載，主畫面已歸零",
       severity: "success"
     };
   } catch (error) {
