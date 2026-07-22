@@ -4,16 +4,14 @@ export type TCounterLayout =
   | "grid"
   | "list"
   | "mosaic"
-  | "keypad"
-;
+  | "keypad";
 
 export type TCounterCardVariant =
   | "tile"
   | "list"
   | "mosaicHero"
   | "mosaicCompact"
-  | "key"
-;
+  | "key";
 
 export interface IThemeOption {
   name: TThemeName;
@@ -76,6 +74,7 @@ export const THEME_DEFINITIONS: Record<TThemeName, IThemeDefinition> = {
       公車: { background: "#FEF7E0", accent: "#B06000", text: "#111827", border: "#B06000" },
       大貨車: { background: "#F3E8FD", accent: "#7627BB", text: "#111827", border: "#7627BB" },
       聯結車: { background: "#E4F7FB", accent: "#007B83", text: "#111827", border: "#007B83" },
+      自行車: { background: "#FCE8E6", accent: "#D93025", text: "#111827", border: "#D93025" },
       其他: { background: "#F1F3F4", accent: "#5F6368", text: "#111827", border: "#5F6368" }
     }
   },
@@ -105,6 +104,7 @@ export const THEME_DEFINITIONS: Record<TThemeName, IThemeDefinition> = {
       公車: { background: "#2E2410", accent: "#FDD663", text: "#F1F3F4", border: "#FDD663" },
       大貨車: { background: "#241333", accent: "#D0A3F5", text: "#F1F3F4", border: "#D0A3F5" },
       聯結車: { background: "#0E2A2D", accent: "#78D9E2", text: "#F1F3F4", border: "#78D9E2" },
+      自行車: { background: "#311A1A", accent: "#F28B82", text: "#F1F3F4", border: "#F28B82" },
       其他: { background: "#22252A", accent: "#BDC1C6", text: "#F1F3F4", border: "#BDC1C6" }
     }
   },
@@ -134,6 +134,7 @@ export const THEME_DEFINITIONS: Record<TThemeName, IThemeDefinition> = {
       公車: { background: "#F7FAFC", accent: "#A65E00", text: "#102A43", border: "#A65E00" },
       大貨車: { background: "#F7FAFC", accent: "#7250A3", text: "#102A43", border: "#7250A3" },
       聯結車: { background: "#F7FAFC", accent: "#0A7783", text: "#102A43", border: "#0A7783" },
+      自行車: { background: "#F7FAFC", accent: "#C2410C", text: "#102A43", border: "#C2410C" },
       其他: { background: "#F7FAFC", accent: "#52606D", text: "#102A43", border: "#52606D" }
     }
   },
@@ -163,6 +164,7 @@ export const THEME_DEFINITIONS: Record<TThemeName, IThemeDefinition> = {
       公車: { background: "#FED7AA", accent: "#9A3412", text: "#111827", border: "#111827" },
       大貨車: { background: "#E9D5FF", accent: "#6B21A8", text: "#111827", border: "#111827" },
       聯結車: { background: "#A5F3FC", accent: "#155E75", text: "#111827", border: "#111827" },
+      自行車: { background: "#FECACA", accent: "#991B1B", text: "#111827", border: "#111827" },
       其他: { background: "#E5E7EB", accent: "#374151", text: "#111827", border: "#111827" }
     }
   },
@@ -192,6 +194,7 @@ export const THEME_DEFINITIONS: Record<TThemeName, IThemeDefinition> = {
       公車: { background: "#FFF1D6", accent: "#A66A00", text: "#153A3E", border: "#D9A84E" },
       大貨車: { background: "#EEE7F7", accent: "#72568A", text: "#153A3E", border: "#A88BBC" },
       聯結車: { background: "#DCEAF7", accent: "#31688E", text: "#153A3E", border: "#6E9EBC" },
+      自行車: { background: "#FCE7F3", accent: "#9D174D", text: "#153A3E", border: "#C77AA2" },
       其他: { background: "#E7EEEE", accent: "#587274", text: "#153A3E", border: "#91A6A7" }
     }
   },
@@ -221,6 +224,7 @@ export const THEME_DEFINITIONS: Record<TThemeName, IThemeDefinition> = {
       公車: { background: "#FFE8B6", accent: "#A15C00", text: "#3B1D17", border: "#D9982F" },
       大貨車: { background: "#F2DFEA", accent: "#8A3A63", text: "#3B1D17", border: "#B66C91" },
       聯結車: { background: "#DDEEEF", accent: "#23656A", text: "#3B1D17", border: "#5A9296" },
+      自行車: { background: "#E8E4F4", accent: "#6D4C91", text: "#3B1D17", border: "#9278B0" },
       其他: { background: "#ECE4DF", accent: "#6B544A", text: "#3B1D17", border: "#9C8277" }
     }
   },
@@ -250,6 +254,7 @@ export const THEME_DEFINITIONS: Record<TThemeName, IThemeDefinition> = {
       公車: { background: "#E7E7E7", accent: "#333333", text: "#111111", border: "#111111" },
       大貨車: { background: "#DADADA", accent: "#444444", text: "#111111", border: "#111111" },
       聯結車: { background: "#CDCDCD", accent: "#555555", text: "#111111", border: "#111111" },
+      自行車: { background: "#C6C6C6", accent: "#666666", text: "#111111", border: "#111111" },
       其他: { background: "#BFBFBF", accent: "#111111", text: "#111111", border: "#111111" }
     }
   },
@@ -279,6 +284,7 @@ export const THEME_DEFINITIONS: Record<TThemeName, IThemeDefinition> = {
       公車: { background: "#2A2110", accent: "#FBBF24", text: "#F5F3FF", border: "#FBBF24" },
       大貨車: { background: "#281332", accent: "#D946EF", text: "#F5F3FF", border: "#D946EF" },
       聯結車: { background: "#101D35", accent: "#60A5FA", text: "#F5F3FF", border: "#60A5FA" },
+      自行車: { background: "#32152A", accent: "#F472B6", text: "#F5F3FF", border: "#F472B6" },
       其他: { background: "#202336", accent: "#C4B5FD", text: "#F5F3FF", border: "#C4B5FD" }
     }
   },
@@ -286,7 +292,7 @@ export const THEME_DEFINITIONS: Record<TThemeName, IThemeDefinition> = {
     option: {
       name: "mosaic",
       label: "非對稱資訊牆",
-      description: "前兩種車輛使用全寬大卡，其餘四種採緊湊雙欄",
+      description: "前兩種車輛使用全寬大卡，其餘五種採緊湊雙欄",
       previewColors: ["#172554", "#BFDBFE", "#F8FAFC"]
     },
     mode: "light",
@@ -308,6 +314,7 @@ export const THEME_DEFINITIONS: Record<TThemeName, IThemeDefinition> = {
       公車: { background: "#FEF3C7", accent: "#A16207", text: "#0F172A", border: "#A16207" },
       大貨車: { background: "#F3E8FF", accent: "#7E22CE", text: "#0F172A", border: "#7E22CE" },
       聯結車: { background: "#CFFAFE", accent: "#0E7490", text: "#0F172A", border: "#0E7490" },
+      自行車: { background: "#FCE7F3", accent: "#BE185D", text: "#0F172A", border: "#BE185D" },
       其他: { background: "#E2E8F0", accent: "#475569", text: "#0F172A", border: "#475569" }
     }
   },
@@ -315,7 +322,7 @@ export const THEME_DEFINITIONS: Record<TThemeName, IThemeDefinition> = {
     option: {
       name: "keypad",
       label: "錯位鍵盤",
-      description: "2－3－1 錯位排列，像大型硬體按鍵，不使用規則 2×3",
+      description: "2－3－2 錯位排列，像大型硬體按鍵，不使用規則網格",
       previewColors: ["#5B21B6", "#DDD6FE", "#F5F3FF"]
     },
     mode: "light",
@@ -337,6 +344,7 @@ export const THEME_DEFINITIONS: Record<TThemeName, IThemeDefinition> = {
       公車: { background: "#FEF3C7", accent: "#92400E", text: "#1E1B4B", border: "#92400E" },
       大貨車: { background: "#FCE7F3", accent: "#9D174D", text: "#1E1B4B", border: "#9D174D" },
       聯結車: { background: "#CFFAFE", accent: "#155E75", text: "#1E1B4B", border: "#155E75" },
+      自行車: { background: "#FFEDD5", accent: "#C2410C", text: "#1E1B4B", border: "#C2410C" },
       其他: { background: "#E2E8F0", accent: "#334155", text: "#1E1B4B", border: "#334155" }
     }
   },
