@@ -17,7 +17,7 @@ async function readCount(page: Page, vehicleType: "機車" | "汽車"): Promise<
   return Number(match[1]);
 }
 
-test("快速交替與雙指同按會各自計入機車和汽車", async ({ page, context }) => {
+test("快速交替與雙指同按會分別計數，取消或滑出不計數", async ({ page, context }) => {
   const pageErrors: string[] = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
 
@@ -65,6 +65,28 @@ test("快速交替與雙指同按會各自計入機車和汽車", async ({ page,
     y: carBox.y + carBox.height / 2
   };
   const cdp = await context.newCDPSession(page);
+
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchStart",
+    touchPoints: [motorcyclePoint]
+  });
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchCancel", touchPoints: [] });
+  await expect.poll(() => readCount(page, "機車")).toBe(0);
+
+  const outsideMotorcyclePoint = {
+    ...motorcyclePoint,
+    y: motorcycleBox.y + motorcycleBox.height + 24
+  };
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchStart",
+    touchPoints: [motorcyclePoint]
+  });
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchMove",
+    touchPoints: [outsideMotorcyclePoint]
+  });
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  await expect.poll(() => readCount(page, "機車")).toBe(0);
 
   for (let index = 0; index < 10; index += 1) {
     const point = index % 2 === 0 ? motorcyclePoint : carPoint;

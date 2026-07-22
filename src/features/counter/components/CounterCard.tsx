@@ -22,8 +22,20 @@ export interface ICounterCardProps {
 
 const DECREASE_FLASH = "#D93025";
 
+function isPointerInside<T extends HTMLElement>(event: ReactPointerEvent<T>): boolean {
+  const bounds = event.currentTarget.getBoundingClientRect();
+  return (
+    event.clientX >= bounds.left &&
+    event.clientX <= bounds.right &&
+    event.clientY >= bounds.top &&
+    event.clientY <= bounds.bottom
+  );
+}
+
 export function CounterCard(props: ICounterCardProps): React.JSX.Element {
-  const lastTouchActivation = useRef(Number.NEGATIVE_INFINITY);
+  const activeIncreasePointers = useRef(new Set<number>());
+  const activeDecreasePointers = useRef(new Set<number>());
+  const lastTouchActivation = useRef<number | null>(null);
   const visual = getCounterCardVisual(props.themeName, props.vehicleType);
   const dark = isDarkTheme(props.themeName);
   const flashColor =
@@ -39,14 +51,28 @@ export function CounterCard(props: ICounterCardProps): React.JSX.Element {
       "pointerType" in event.nativeEvent ? String(event.nativeEvent.pointerType) : "";
     if (event.detail === 0) return false;
     if (nativePointerType !== "") return isTouchLikePointer(nativePointerType);
-    return event.timeStamp - lastTouchActivation.current < 750;
+    return (
+      lastTouchActivation.current !== null &&
+      event.timeStamp - lastTouchActivation.current >= 0 &&
+      event.timeStamp - lastTouchActivation.current < 750
+    );
   }
 
   function handleIncreasePointerDown(event: ReactPointerEvent<HTMLDivElement>): void {
     if (!isTouchLikePointer(event.pointerType)) return;
-    event.preventDefault();
+    activeIncreasePointers.current.add(event.pointerId);
+  }
+
+  function handleIncreasePointerUp(event: ReactPointerEvent<HTMLDivElement>): void {
+    if (!isTouchLikePointer(event.pointerType)) return;
+    const startedHere = activeIncreasePointers.current.delete(event.pointerId);
+    if (!startedHere) return;
     lastTouchActivation.current = event.timeStamp;
-    props.onIncrease();
+    if (isPointerInside(event)) props.onIncrease();
+  }
+
+  function handleIncreasePointerCancel(event: ReactPointerEvent<HTMLDivElement>): void {
+    activeIncreasePointers.current.delete(event.pointerId);
   }
 
   function handleIncreaseClick(event: MouseEvent<HTMLDivElement>): void {
@@ -57,9 +83,21 @@ export function CounterCard(props: ICounterCardProps): React.JSX.Element {
   function handleDecreasePointerDown(event: ReactPointerEvent<HTMLButtonElement>): void {
     event.stopPropagation();
     if (!isTouchLikePointer(event.pointerType)) return;
-    event.preventDefault();
+    activeDecreasePointers.current.add(event.pointerId);
+  }
+
+  function handleDecreasePointerUp(event: ReactPointerEvent<HTMLButtonElement>): void {
+    event.stopPropagation();
+    if (!isTouchLikePointer(event.pointerType)) return;
+    const startedHere = activeDecreasePointers.current.delete(event.pointerId);
+    if (!startedHere) return;
     lastTouchActivation.current = event.timeStamp;
-    props.onDecrease();
+    if (isPointerInside(event)) props.onDecrease();
+  }
+
+  function handleDecreasePointerCancel(event: ReactPointerEvent<HTMLButtonElement>): void {
+    event.stopPropagation();
+    activeDecreasePointers.current.delete(event.pointerId);
   }
 
   function handleDecreaseClick(event: MouseEvent<HTMLButtonElement>): void {
@@ -73,6 +111,8 @@ export function CounterCard(props: ICounterCardProps): React.JSX.Element {
       aria-label={`${props.vehicleType} 減一`}
       aria-disabled={props.count === 0}
       onPointerDown={handleDecreasePointerDown}
+      onPointerUp={handleDecreasePointerUp}
+      onPointerCancel={handleDecreasePointerCancel}
       onClick={handleDecreaseClick}
       size="small"
       sx={{
@@ -101,6 +141,8 @@ export function CounterCard(props: ICounterCardProps): React.JSX.Element {
     <ButtonBase
       component="div"
       onPointerDown={handleIncreasePointerDown}
+      onPointerUp={handleIncreasePointerUp}
+      onPointerCancel={handleIncreasePointerCancel}
       onClick={handleIncreaseClick}
       aria-label={`${props.vehicleType} 加一，目前 ${props.count}`}
       sx={{
