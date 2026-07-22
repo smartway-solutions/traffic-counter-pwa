@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { Children, type ReactNode } from "react";
-import type { TCounterLayout } from "../themes.ts";
+import type { TCounterLayout } from "../../../themes.ts";
 
 interface ICounterGridProps {
   children: ReactNode;

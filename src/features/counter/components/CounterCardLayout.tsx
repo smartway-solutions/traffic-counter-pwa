@@ -1,7 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import type { TCounterCardVariant } from "../themes.ts";
-import type { TVehicleType } from "../types.ts";
+import type { TCounterCardVariant } from "../../../themes.ts";
+import type { TVehicleType } from "../../../types.ts";
 
 interface ICounterCardLayoutProps {
   variant: TCounterCardVariant;

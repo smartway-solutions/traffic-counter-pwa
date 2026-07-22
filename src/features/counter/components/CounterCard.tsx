@@ -5,8 +5,8 @@ import {
   getCounterCardVisual,
   isDarkTheme,
   type TCounterCardVariant
-} from "../themes.ts";
-import type { TCountAction, TThemeName, TVehicleType } from "../types.ts";
+} from "../../../themes.ts";
+import type { TCountAction, TThemeName, TVehicleType } from "../../../types.ts";
 import { CounterCardLayout } from "./CounterCardLayout.tsx";
 
 export interface ICounterCardProps {

@@ -2,7 +2,7 @@ import type {
   IFeedbackEventConfig,
   TSoundEffect,
   TVibrationLevel
-} from "./types.ts";
+} from "../../../types.ts";
 
 export type TFeedbackPlaybackStatus = "played" | "off" | "unsupported";
 

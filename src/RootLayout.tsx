@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { Navigate, Outlet, useLocation } from "react-router";
 import { isSetupComplete, type IAppContext } from "./appContext.ts";
 import { useClock } from "./hooks/useClock.ts";
-import { useGeolocation } from "./hooks/useGeolocation.ts";
+import { useGeolocation } from "./features/geolocation/hooks/useGeolocation.ts";
 import { usePersistentState } from "./hooks/usePersistentState.ts";
 import { buildMuiTheme } from "./themes.ts";
 
