@@ -28,7 +28,7 @@
 - 增加成功：套用 `feedbackSettings.increase`。
 - 減少成功：套用 `feedbackSettings.decrease`。
 - 工作區為 0 仍減少：不寫入紀錄，套用 `feedbackSettings.negativeError` 並顯示警告。
-- 計數事件只複製 `useGeolocation` 提供的 70 秒內快取；按鈕事件不得直接呼叫 Geolocation API。
+- 計數或儲存時使用最近一次成功定位；若定位已超過 20 秒，事件的 `gps` 為 `null`。按鈕事件不得直接呼叫 Geolocation API。
 
 ## Quick Save／Auto Save
 

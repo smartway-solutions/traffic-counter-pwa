@@ -1,7 +1,7 @@
 # RootLayout 規格
 
 ## 目的
-Hash 路由根層：持有 LocalStorage 狀態、GPS 排程快取與每秒時鐘，透過 React Router `Outlet` context 傳給各頁。
+Hash 路由根層：持有 LocalStorage 狀態、GPS 最近樣本狀態與每秒時鐘，透過 React Router `Outlet` context 傳給各頁。
 
 ## 路由守衛
 - 路段或使用者未完成，且目前不在 `/setup` 時，導向 `/setup`。

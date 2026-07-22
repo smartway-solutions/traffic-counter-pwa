@@ -1,149 +1,122 @@
+import type { IGeolocationState, IGpsSample } from "../types/gpsTypes.ts";
+import { GPS_SAMPLE_MAX_AGE_MS } from "../utils/gpsSampling.ts";
 import {
-  GPS_CACHE_MAX_AGE_MS,
-  GPS_SAMPLE_TIMEOUT_MS,
-  getDelayToNextGpsSampleWindow,
-  getGpsSampleWindowKey,
-  isGpsSampleFresh
-} from "../utils/gpsSampling.ts";
-import type { IGpsSnapshot } from "../../../types.ts";
-import type { IGeolocationState } from "../types/gpsTypes.ts";
+  getGeolocationErrorMessage,
+  isPermissionDenied,
+  requestGpsSample
+} from "./geolocationClient.ts";
+import { GpsSampleStore } from "./gpsSampleStore.ts";
+import { startGpsScheduler } from "./gpsScheduler.ts";
 
-type TGpsStateListener = (state: IGeolocationState | ((previous: IGeolocationState) => IGeolocationState)) => void;
+type TGpsStateListener = (
+  state: IGeolocationState | ((previous: IGeolocationState) => IGeolocationState)
+) => void;
 
 export function startGpsSampler(setState: TGpsStateListener): () => void {
+  const samples = new GpsSampleStore();
   let disposed = false;
-  let scheduleTimerId: number | null = null;
-  let staleTimerId: number | null = null;
   let requestInFlight = false;
-  let permissionBlocked = false;
-  let lastRequestedWindowKey: string | null = null;
+  let staleTimerId: number | null = null;
+  let stopScheduler: (() => void) | null = null;
   let permissionStatus: PermissionStatus | null = null;
-  let cachedPosition: IGpsSnapshot | null = null;
-  let cachedAtMs: number | null = null;
 
   if (!("geolocation" in navigator)) {
     setState({ position: null, sampledAtMs: null, status: "unsupported", message: "裝置不支援 GPS" });
     return () => undefined;
   }
 
-  function clearTimer(timerId: number | null): null {
-    if (timerId !== null) window.clearTimeout(timerId);
-    return null;
+  function clearStaleTimer(): void {
+    if (staleTimerId !== null) window.clearTimeout(staleTimerId);
+    staleTimerId = null;
   }
 
-  function expireStaleCache(nowMs: number): void {
-    if (cachedPosition === null || isGpsSampleFresh(cachedAtMs, nowMs)) return;
-    cachedPosition = null;
-    cachedAtMs = null;
-    staleTimerId = clearTimer(staleTimerId);
-    setState({ position: null, sampledAtMs: null, status: "error", message: "GPS 資料逾時" });
+  function clearSample(): void {
+    clearStaleTimer();
+    samples.clear();
   }
 
-  function scheduleCacheExpiry(sampledAtMs: number): void {
-    staleTimerId = clearTimer(staleTimerId);
-    const delay = Math.max(1, sampledAtMs + GPS_CACHE_MAX_AGE_MS + 1 - Date.now());
+  function showDenied(): void {
+    stopScheduler?.();
+    stopScheduler = null;
+    clearSample();
+    setState({ position: null, sampledAtMs: null, status: "denied", message: "GPS 權限未允許" });
+  }
+
+  function scheduleExpiry(sample: IGpsSample): void {
+    clearStaleTimer();
+    const delay = Math.max(1, sample.sampledAtMs + GPS_SAMPLE_MAX_AGE_MS + 1 - Date.now());
     staleTimerId = window.setTimeout(() => {
-      if (!disposed && cachedAtMs === sampledAtMs) expireStaleCache(Date.now());
+      if (disposed || samples.getLatest()?.sampledAtMs !== sample.sampledAtMs) return;
+      clearSample();
+      setState({ position: null, sampledAtMs: null, status: "error", message: "GPS 最近樣本已逾時" });
     }, delay);
   }
 
-  function handlePosition(position: GeolocationPosition): void {
-    requestInFlight = false;
-    if (disposed) return;
-    const sampledAtMs = Date.now();
-    cachedPosition = {
-      latitude: position.coords.latitude,
-      longitude: position.coords.longitude,
-      accuracyMeters: position.coords.accuracy
-    };
-    cachedAtMs = sampledAtMs;
+  function publishSample(sample: IGpsSample): void {
+    samples.set(sample);
     setState({
-      position: cachedPosition,
-      sampledAtMs,
+      position: sample.position,
+      sampledAtMs: sample.sampledAtMs,
       status: "ready",
-      message: `GPS ±${Math.round(position.coords.accuracy)}m`
+      message: `GPS ±${Math.round(sample.position.accuracyMeters)}m`
     });
-    scheduleCacheExpiry(sampledAtMs);
+    scheduleExpiry(sample);
   }
 
-  function handlePositionError(error: GeolocationPositionError): void {
-    requestInFlight = false;
-    if (disposed) return;
-    if (error.code === error.PERMISSION_DENIED) {
-      permissionBlocked = true;
-      scheduleTimerId = clearTimer(scheduleTimerId);
-      staleTimerId = clearTimer(staleTimerId);
-      cachedPosition = null;
-      cachedAtMs = null;
-      setState({ position: null, sampledAtMs: null, status: "denied", message: "GPS 權限未允許" });
-      return;
-    }
-
-    expireStaleCache(Date.now());
-    if (cachedPosition !== null && cachedAtMs !== null) {
-      const ageSeconds = Math.max(0, Math.floor((Date.now() - cachedAtMs) / 1_000));
+  function publishFailure(error: unknown): void {
+    const sample = samples.getFresh(Date.now());
+    if (sample !== null) {
+      const ageSeconds = Math.max(0, Math.floor((Date.now() - sample.sampledAtMs) / 1_000));
       setState({
-        position: cachedPosition,
-        sampledAtMs: cachedAtMs,
+        position: sample.position,
+        sampledAtMs: sample.sampledAtMs,
         status: "ready",
-        message: `GPS 快取 ${ageSeconds} 秒前`
+        message: `GPS 最近樣本 ${ageSeconds} 秒前`
       });
       return;
     }
-    setState({ position: null, sampledAtMs: null, status: "error", message: `GPS 取樣失敗：${error.message}` });
-  }
-
-  function requestCurrentWindow(nowMs: number): void {
-    const windowKey = getGpsSampleWindowKey(nowMs);
-    if (
-      windowKey === lastRequestedWindowKey ||
-      requestInFlight ||
-      document.visibilityState !== "visible"
-    ) return;
-
-    lastRequestedWindowKey = windowKey;
-    requestInFlight = true;
-    if (cachedPosition === null) {
-      setState({ position: null, sampledAtMs: null, status: "requesting", message: "正在取得 GPS" });
-    }
-    navigator.geolocation.getCurrentPosition(handlePosition, handlePositionError, {
-      enableHighAccuracy: true,
-      maximumAge: 0,
-      timeout: GPS_SAMPLE_TIMEOUT_MS
+    clearStaleTimer();
+    setState({
+      position: null,
+      sampledAtMs: null,
+      status: "error",
+      message: `GPS 取樣失敗：${getGeolocationErrorMessage(error)}`
     });
   }
 
-  function runScheduler(): void {
-    if (disposed) return;
-    scheduleTimerId = clearTimer(scheduleTimerId);
-    const nowMs = Date.now();
-    expireStaleCache(nowMs);
-    if (!permissionBlocked && permissionStatus?.state !== "denied") requestCurrentWindow(nowMs);
-    if (document.visibilityState === "visible") {
-      scheduleTimerId = window.setTimeout(runScheduler, getDelayToNextGpsSampleWindow(nowMs));
+  async function sampleCurrentPosition(): Promise<void> {
+    if (requestInFlight || disposed) return;
+    requestInFlight = true;
+    if (samples.getLatest() === null) {
+      setState({ position: null, sampledAtMs: null, status: "requesting", message: "正在取得 GPS" });
+    }
+    try {
+      const sample = await requestGpsSample();
+      if (!disposed) publishSample(sample);
+    } catch (error) {
+      if (!disposed) {
+        if (isPermissionDenied(error)) showDenied();
+        else publishFailure(error);
+      }
+    } finally {
+      requestInFlight = false;
     }
   }
 
-  function handleVisibilityChange(): void {
-    if (document.visibilityState === "visible") runScheduler();
-    else scheduleTimerId = clearTimer(scheduleTimerId);
+  function startScheduler(): void {
+    if (stopScheduler === null) {
+      stopScheduler = startGpsScheduler(() => void sampleCurrentPosition());
+    }
   }
 
   function handlePermissionChange(): void {
-    if (permissionStatus?.state === "denied") {
-      permissionBlocked = true;
-      scheduleTimerId = clearTimer(scheduleTimerId);
-      staleTimerId = clearTimer(staleTimerId);
-      cachedPosition = null;
-      cachedAtMs = null;
-      setState({ position: null, sampledAtMs: null, status: "denied", message: "GPS 權限未允許" });
-      return;
+    if (permissionStatus?.state === "denied") showDenied();
+    else {
+      setState((previous) => previous.position === null
+        ? { ...previous, status: "requesting", message: "等待 GPS 取樣" }
+        : previous);
+      startScheduler();
     }
-    permissionBlocked = false;
-    setState((previous) => previous.position === null
-      ? { ...previous, status: "requesting", message: "等待 GPS 取樣" }
-      : previous);
-    runScheduler();
   }
 
   async function initialize(): Promise<void> {
@@ -153,23 +126,21 @@ export function startGpsSampler(setState: TGpsStateListener): () => void {
         if (disposed) return;
         permissionStatus.addEventListener("change", handlePermissionChange);
         if (permissionStatus.state === "denied") {
-          handlePermissionChange();
+          showDenied();
           return;
         }
       } catch {
         permissionStatus = null;
       }
     }
-    runScheduler();
+    startScheduler();
   }
 
-  document.addEventListener("visibilitychange", handleVisibilityChange);
   void initialize();
   return () => {
     disposed = true;
-    scheduleTimerId = clearTimer(scheduleTimerId);
-    staleTimerId = clearTimer(staleTimerId);
-    document.removeEventListener("visibilitychange", handleVisibilityChange);
+    stopScheduler?.();
+    clearStaleTimer();
     permissionStatus?.removeEventListener("change", handlePermissionChange);
   };
 }

@@ -9,6 +9,11 @@ export interface IGeolocationState {
   message: string;
 }
 
+export interface IGpsSample {
+  position: IGpsSnapshot;
+  sampledAtMs: number;
+}
+
 export const INITIAL_GEOLOCATION_STATE: IGeolocationState = {
   position: null,
   sampledAtMs: null,

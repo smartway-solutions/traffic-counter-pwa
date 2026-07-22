@@ -1,11 +1,13 @@
 import assert from "node:assert/strict";
 import {
-  GPS_CACHE_MAX_AGE_MS,
+  GPS_SAMPLE_MAX_AGE_MS,
   getDelayToNextGpsSampleWindow,
   getGpsSampleWindow,
   getGpsSampleWindowKey,
+  isGpsRequestDue,
   isGpsSampleFresh
 } from "../src/features/geolocation/utils/gpsSampling.ts";
+import { GpsSampleStore } from "../src/features/geolocation/services/gpsSampleStore.ts";
 
 assert.equal(getGpsSampleWindow(0), 0);
 assert.equal(getGpsSampleWindow(10_000), 0);
@@ -41,9 +43,26 @@ assert.equal(getDelayToNextGpsSampleWindow(20_001), 10_000);
 assert.equal(getDelayToNextGpsSampleWindow(50_001), 9_999);
 assert.equal(getDelayToNextGpsSampleWindow(59_999), 1);
 
-assert.equal(isGpsSampleFresh(1_000, 1_000 + GPS_CACHE_MAX_AGE_MS), true);
-assert.equal(isGpsSampleFresh(1_000, 1_001 + GPS_CACHE_MAX_AGE_MS), false);
+assert.equal(isGpsRequestDue(null, 9_900), true);
+assert.equal(isGpsRequestDue(9_900, 10_001), false);
+assert.equal(isGpsRequestDue(9_900, 19_899), false);
+assert.equal(isGpsRequestDue(9_900, 19_900), true);
+assert.equal(isGpsRequestDue(20_000, 19_999), false);
+
+assert.equal(GPS_SAMPLE_MAX_AGE_MS, 20_000);
+assert.equal(isGpsSampleFresh(1_000, 1_000 + GPS_SAMPLE_MAX_AGE_MS), true);
+assert.equal(isGpsSampleFresh(1_000, 1_001 + GPS_SAMPLE_MAX_AGE_MS), false);
 assert.equal(isGpsSampleFresh(null, 1_000), false);
 assert.equal(isGpsSampleFresh(2_000, 1_000), false);
+
+const samples = new GpsSampleStore();
+const sample = {
+  position: { latitude: 25.04, longitude: 121.56, accuracyMeters: 8 },
+  sampledAtMs: 1_000
+};
+samples.set(sample);
+assert.equal(samples.getFresh(1_000 + GPS_SAMPLE_MAX_AGE_MS), sample);
+assert.equal(samples.getFresh(1_001 + GPS_SAMPLE_MAX_AGE_MS), null);
+assert.equal(samples.getLatest(), null);
 
 console.log("GPS sampling boundary tests passed.");

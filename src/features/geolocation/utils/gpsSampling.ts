@@ -2,7 +2,8 @@
 export const GPS_SAMPLE_WINDOW_MS = 10_000;
 export const GPS_SAMPLE_WINDOWS_PER_MINUTE = 6;
 export const GPS_SAMPLE_TIMEOUT_MS = 8_000;
-export const GPS_CACHE_MAX_AGE_MS = 70_000;
+/** 一個取樣週期加一次請求 timeout，再保留 2 秒排程誤差。 */
+export const GPS_SAMPLE_MAX_AGE_MS = 20_000;
 
 export type TGpsSampleWindow = 0 | 1 | 2 | 3 | 4 | 5;
 
@@ -24,6 +25,13 @@ export function getGpsSampleWindowKey(nowMs: number): string {
   return `${Math.floor(nowMs / 60_000)}:${windowIndex}`;
 }
 
+export function isGpsRequestDue(lastRequestedAtMs: number | null, nowMs: number): boolean {
+  return (
+    lastRequestedAtMs === null ||
+    (nowMs >= lastRequestedAtMs && nowMs - lastRequestedAtMs >= GPS_SAMPLE_WINDOW_MS)
+  );
+}
+
 /** 回傳下一個可能取樣時間；加 1ms 明確區隔 10.000 與 10.001 秒。 */
 export function getDelayToNextGpsSampleWindow(nowMs: number): number {
   const offset = getMinuteOffset(nowMs);
@@ -39,6 +47,6 @@ export function isGpsSampleFresh(sampledAtMs: number | null, nowMs: number): boo
   return (
     sampledAtMs !== null &&
     nowMs >= sampledAtMs &&
-    nowMs - sampledAtMs <= GPS_CACHE_MAX_AGE_MS
+    nowMs - sampledAtMs <= GPS_SAMPLE_MAX_AGE_MS
   );
 }
