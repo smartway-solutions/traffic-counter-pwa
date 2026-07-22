@@ -95,6 +95,7 @@ function normalizeRecord(value: unknown): ICountRecord | null {
     gps: normalizeGpsSnapshot(record.gps),
     roadSection: typeof record.roadSection === "string" ? record.roadSection : "",
     userName: typeof record.userName === "string" ? record.userName : "",
+    facingDirection: typeof record.facingDirection === "string" ? record.facingDirection : "",
     screenshotFilename:
       typeof record.screenshotFilename === "string" ? record.screenshotFilename : null,
     savedWorkingCountsJson:
@@ -116,6 +117,7 @@ function readStoredState(): IStoredState {
     return {
       ...initial,
       ...stored,
+      facingDirection: typeof stored.facingDirection === "string" ? stored.facingDirection : "",
       theme: isThemeName(stored.theme) ? stored.theme : "default",
       feedbackSettings: mergeFeedbackSettings(initial.feedbackSettings, stored.feedbackSettings),
       autoSaveEnabled: stored.autoSaveEnabled === true,

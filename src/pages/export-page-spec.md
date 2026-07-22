@@ -3,19 +3,20 @@
 ## 目的
 
 唯一顯示統計的地方（需求：統計資料在匯出時才顯示）。
-提供四分頁檢視與 CSV 匯出；主畫面不出現任何統計數字。
+提供四分頁檢視與 ZIP 打包匯出；主畫面不出現任何統計數字。
 
 ## 版面
 
 - `100dvh` flex 直欄、`overflow: hidden`（整頁不捲動；表格內部自行捲動）。
-- 頂欄：返回鍵（回 `#/`）、標題「匯出與統計」、右側「匯出 CSV」按鈕。
+- 頂欄：返回鍵（回 `#/`）、標題「匯出與統計」、右側「打包下載 ZIP」按鈕。
 - 內容：`DataGridPanel`（受控 `view`）撐滿剩餘高度。
+- 預設分頁為「保存紀錄」。
 
 ## 匯出流程
 
-1. 點「匯出 CSV」→ 開確認 Dialog：顯示目前分頁名稱、筆數，以及 `BrandNotice`。
-2. 「確認匯出」→ 以 `exportRequest { view, token }` 觸發 `DataGridPanel` 匯出目前分頁。
-3. 「取消」→ 關閉 Dialog，不匯出。
+1. 點「打包下載 ZIP」→ 以 `zipExportRequest { token }` 觸發 `DataGridPanel` 依序取得四個分頁的 CSV（`GridApi.getDataAsCsv()`）。
+2. 全部取得後打包成單一 ZIP 並下載；完成或失敗都會用底部 Snackbar 顯示結果。
+3. 沒有單分頁 CSV 匯出功能；四張表一律一起打包，避免使用者只匯出片段資料。
 
 ## 資料
 

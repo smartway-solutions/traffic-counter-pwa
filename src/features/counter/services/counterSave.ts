@@ -1,9 +1,10 @@
 import { createEmptyCounts } from "../../../constants.ts";
 import { persistStoredState } from "../../../hooks/usePersistentState.ts";
 import type { IStoredState, TSaveType } from "../../../types.ts";
+import { downloadBlob } from "../../../utils/downloadBlob.ts";
 import type { IGeolocationState } from "../../geolocation/types/gpsTypes.ts";
 import { createSaveRecord, createScreenshotFilename } from "../utils/counterRecords.ts";
-import { captureElementAsPng } from "./saveSnapshot.ts";
+import { renderElementToPngBlob } from "./saveSnapshot.ts";
 
 export interface ICounterNotice {
   message: string;
@@ -44,7 +45,8 @@ export async function saveCounterSnapshot(options: ISaveCounterOptions): Promise
     pendingRecorded = true;
     applyState(pendingState);
 
-    await captureElementAsPng(captureTarget, screenshotFilename);
+    const pngBlob = await renderElementToPngBlob(captureTarget);
+    downloadBlob(pngBlob, screenshotFilename);
 
     const latest = getLatestState();
     const completedState: IStoredState = {

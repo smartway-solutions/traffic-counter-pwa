@@ -47,6 +47,8 @@ export interface ICountRecord {
   gps: IGpsSnapshot | null;
   roadSection: string;
   userName: string;
+  /** 觀測者面向路段的方向；自由文字，選填，空字串代表未填寫。 */
+  facingDirection: string;
   screenshotFilename: string | null;
   savedWorkingCountsJson: string | null;
   savedRecordCount: number | null;
@@ -80,6 +82,7 @@ export type TThemeName =
 export interface IStoredState {
   roadSection: string;
   userName: string;
+  facingDirection: string;
   theme: TThemeName;
   feedbackSettings: IFeedbackSettings;
   autoSaveEnabled: boolean;

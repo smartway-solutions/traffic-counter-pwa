@@ -80,6 +80,7 @@ export function createCountRecord(
     gps: getFreshGpsSnapshot(geolocation, now.getTime()),
     roadSection: snapshot.roadSection,
     userName: snapshot.userName,
+    facingDirection: snapshot.facingDirection,
     screenshotFilename: null,
     savedWorkingCountsJson: null,
     savedRecordCount: null
@@ -110,6 +111,7 @@ export function createSaveRecord(
     gps: getFreshGpsSnapshot(geolocation, now.getTime()),
     roadSection: snapshot.roadSection,
     userName: snapshot.userName,
+    facingDirection: snapshot.facingDirection,
     screenshotFilename,
     savedWorkingCountsJson: JSON.stringify(snapshot.workingCounts),
     savedRecordCount: countUnsavedRecords(snapshot.records)

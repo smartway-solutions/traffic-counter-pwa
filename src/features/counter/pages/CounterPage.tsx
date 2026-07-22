@@ -32,6 +32,31 @@ export function CounterPage(): React.JSX.Element {
     navigate("/setup", { replace: true });
   }
 
+  async function share(): Promise<void> {
+    const shareData = {
+      title: "手機交通量計數器",
+      text: "手機交通量計數器 PWA：離線用手機計數車流、記錄 GPS 並匯出 CSV。",
+      url: `${window.location.origin}${window.location.pathname}`
+    };
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") {
+          return;
+        }
+        controller.setNotice({ message: "分享失敗，請改用手動複製連結。", severity: "warning" });
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(shareData.url);
+      controller.setNotice({ message: "此瀏覽器不支援分享，已複製安裝連結到剪貼簿。", severity: "success" });
+    } catch {
+      controller.setNotice({ message: "此瀏覽器不支援分享，且無法自動複製連結。", severity: "warning" });
+    }
+  }
+
   return (
     <Box
       ref={captureTargetRef}
@@ -62,6 +87,7 @@ export function CounterPage(): React.JSX.Element {
         onManual={() => navigate("/manual")}
         onChangelog={() => navigate("/changelog")}
         onThemeRequest={() => setThemeDialogOpen(true)}
+        onShare={() => void share()}
         onClearRequest={() => setClearDialogOpen(true)}
       />
       <CounterGrid layout={layout}>
