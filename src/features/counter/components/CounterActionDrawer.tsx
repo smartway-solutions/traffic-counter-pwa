@@ -1,3 +1,4 @@
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import DeleteForeverRoundedIcon from "@mui/icons-material/DeleteForeverRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import FileDownloadRoundedIcon from "@mui/icons-material/FileDownloadRounded";
@@ -5,8 +6,10 @@ import HistoryRoundedIcon from "@mui/icons-material/HistoryRounded";
 import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
 import NotificationsActiveRoundedIcon from "@mui/icons-material/NotificationsActiveRounded";
 import PaletteRoundedIcon from "@mui/icons-material/PaletteRounded";
+import ShareRoundedIcon from "@mui/icons-material/ShareRounded";
 import {
   Box,
+  Button,
   Divider,
   Drawer,
   List,
@@ -14,8 +17,7 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Switch,
-  Typography
+  Switch
 } from "@mui/material";
 import { AUTO_SAVE_INTERVAL_MINUTES } from "../../../constants.ts";
 import { THEME_OPTIONS } from "../../../themes.ts";
@@ -31,6 +33,7 @@ export interface ICounterActionDrawerProps {
   onManual: () => void;
   onChangelog: () => void;
   onThemeRequest: () => void;
+  onShare: () => void;
   onClearRequest: () => void;
 }
 
@@ -53,6 +56,7 @@ export function CounterActionDrawer(props: ICounterActionDrawerProps): React.JSX
       icon: <PaletteRoundedIcon />,
       action: props.onThemeRequest
     },
+    { label: "分享 App", icon: <ShareRoundedIcon />, action: props.onShare },
     {
       label: "清除本機資料",
       icon: <DeleteForeverRoundedIcon />,
@@ -76,16 +80,13 @@ export function CounterActionDrawer(props: ICounterActionDrawerProps): React.JSX
           sx: {
             width: "min(88vw, 360px)",
             pt: "env(safe-area-inset-top)",
-            pb: "env(safe-area-inset-bottom)"
+            pb: "env(safe-area-inset-bottom)",
+            display: "flex",
+            flexDirection: "column"
           }
         }
       }}
     >
-      <Box sx={{ px: 2, py: 1.5 }}>
-        <Typography fontWeight={950}>功能</Typography>
-        <Typography variant="caption" color="text.secondary">右側 Sheet</Typography>
-      </Box>
-      <Divider />
       <List disablePadding>
         <ListItem
           sx={{ minHeight: 64, px: 2 }}
@@ -118,6 +119,18 @@ export function CounterActionDrawer(props: ICounterActionDrawerProps): React.JSX
           </ListItemButton>
         ))}
       </List>
+      <Box sx={{ flex: 1 }} />
+      <Divider />
+      <Box sx={{ p: 1.5 }}>
+        <Button
+          fullWidth
+          variant="outlined"
+          startIcon={<CloseRoundedIcon />}
+          onClick={props.onClose}
+        >
+          關閉
+        </Button>
+      </Box>
     </Drawer>
   );
 }

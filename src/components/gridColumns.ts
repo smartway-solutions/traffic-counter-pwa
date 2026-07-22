@@ -75,6 +75,8 @@ function getSavedWorkingCount(record: ICountRecord, vehicleType: TVehicleType): 
 // 不使用 pinned：釘選欄會壓縮可捲動視窗，手機上容易看似「捲不動」。
 export const COUNT_COLUMNS: ColDef<ICountRecord>[] = [
   { field: "vehicleType", headerName: "車種", minWidth: 90 },
+  { field: "countAfter", headerName: "累計操作後", minWidth: 115 },
+  { field: "localTime", headerName: "時間戳", minWidth: 170 },
   {
     field: "action",
     headerName: "操作",
@@ -83,8 +85,6 @@ export const COUNT_COLUMNS: ColDef<ICountRecord>[] = [
   },
   { field: "delta", headerName: "變動", maxWidth: 80 },
   { field: "workingCountAfter", headerName: "工作區操作後", minWidth: 125 },
-  { field: "countAfter", headerName: "累計操作後", minWidth: 115 },
-  { field: "localTime", headerName: "時間戳", minWidth: 170 },
   {
     headerName: "GPS 位置",
     valueGetter: ({ data }: { data: ICountRecord | undefined }) => (data ? getGpsText(data) : ""),
@@ -105,24 +105,18 @@ export const COUNT_COLUMNS: ColDef<ICountRecord>[] = [
   },
   { field: "roadSection", headerName: "路段", minWidth: 130 },
   { field: "userName", headerName: "使用者", minWidth: 100 },
+  { field: "facingDirection", headerName: "面向方向", minWidth: 110 },
   { field: "id", headerName: "事件 ID", minWidth: 180 },
   { field: "timestampIso", headerName: "ISO 時間", minWidth: 200 }
 ];
 
 export const SAVE_COLUMNS: ColDef<ICountRecord>[] = [
   {
-    field: "saveType",
-    headerName: "保存方式",
-    minWidth: 112,
-    valueFormatter: ({ value }: { value: unknown }) => getSaveTypeLabel(value)
-  },
-  {
     field: "saveStatus",
     headerName: "狀態",
     minWidth: 90,
     valueFormatter: ({ value }: { value: unknown }) => getSaveStatusLabel(value)
   },
-  { field: "savedRecordCount", headerName: "本次保存事件數", minWidth: 135 },
   { field: "localTime", headerName: "時間戳", minWidth: 170 },
   ...VEHICLE_TYPES.map(
     (vehicleType): ColDef<ICountRecord> => ({
@@ -133,6 +127,13 @@ export const SAVE_COLUMNS: ColDef<ICountRecord>[] = [
         data ? getSavedWorkingCount(data, vehicleType) : null
     })
   ),
+  {
+    field: "saveType",
+    headerName: "保存方式",
+    minWidth: 112,
+    valueFormatter: ({ value }: { value: unknown }) => getSaveTypeLabel(value)
+  },
+  { field: "savedRecordCount", headerName: "本次保存事件數", minWidth: 135 },
   { field: "screenshotFilename", headerName: "截圖檔名", minWidth: 260 },
   { field: "saveId", headerName: "Save ID", minWidth: 190 },
   {
@@ -154,6 +155,7 @@ export const SAVE_COLUMNS: ColDef<ICountRecord>[] = [
   },
   { field: "roadSection", headerName: "路段", minWidth: 130 },
   { field: "userName", headerName: "使用者", minWidth: 100 },
+  { field: "facingDirection", headerName: "面向方向", minWidth: 110 },
   { field: "timestampIso", headerName: "ISO 時間", minWidth: 200 }
 ];
 

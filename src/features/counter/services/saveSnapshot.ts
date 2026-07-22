@@ -40,23 +40,12 @@ function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
   });
 }
 
-function downloadBlob(blob: Blob, fileName: string): void {
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = fileName;
-  anchor.style.display = "none";
-  document.body.append(anchor);
-  anchor.click();
-  anchor.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 1_000);
-}
-
 /**
  * 不依賴 Server 或第三方套件，使用 SVG foreignObject 將目前主畫面轉成 PNG。
  * 主畫面若日後加入跨來源圖片，必須提供正確 CORS，否則會明確失敗且不清零。
+ * 回傳 Blob 而非直接下載，讓呼叫端可以與其他匯出檔案一起打包成單一 ZIP。
  */
-export async function captureElementAsPng(element: HTMLElement, fileName: string): Promise<void> {
+export async function renderElementToPngBlob(element: HTMLElement): Promise<Blob> {
   await document.fonts.ready;
 
   const width = Math.max(element.scrollWidth, element.clientWidth);
@@ -94,5 +83,5 @@ export async function captureElementAsPng(element: HTMLElement, fileName: string
   }
   context.scale(scale, scale);
   context.drawImage(image, 0, 0, width, height);
-  downloadBlob(await canvasToBlob(canvas), fileName);
+  return canvasToBlob(canvas);
 }

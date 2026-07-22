@@ -1,4 +1,5 @@
 import {
+  Autocomplete,
   Box,
   Button,
   Dialog,
@@ -15,11 +16,14 @@ import { useNavigate } from "react-router";
 import { isSetupComplete, useAppContext } from "../appContext.ts";
 import { BrandNotice } from "../components/BrandNotice.tsx";
 
+const FACING_DIRECTION_OPTIONS = ["北向", "東北向", "東向", "東南向", "南向", "西南向", "西向", "西北向"];
+
 export function SetupPage(): React.JSX.Element {
   const { state, setState } = useAppContext();
   const navigate = useNavigate();
   const [roadSection, setRoadSection] = useState(state.roadSection);
   const [userName, setUserName] = useState(state.userName);
+  const [facingDirection, setFacingDirection] = useState(state.facingDirection);
 
   // 已完成初始設定＝從選單進來的「編輯」模式，可取消返回；否則為強制初始設定
   const isEditing = isSetupComplete(state);
@@ -36,7 +40,8 @@ export function SetupPage(): React.JSX.Element {
     setState((previous) => ({
       ...previous,
       roadSection: roadSection.trim(),
-      userName: userName.trim()
+      userName: userName.trim(),
+      facingDirection: facingDirection.trim()
     }));
     navigate("/", { replace: true });
   }
@@ -83,6 +88,25 @@ export function SetupPage(): React.JSX.Element {
                   save();
                 }
               }}
+            />
+            <Autocomplete
+              freeSolo
+              options={FACING_DIRECTION_OPTIONS}
+              value={facingDirection}
+              onInputChange={(_event, nextValue) => setFacingDirection(nextValue)}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="面向方向"
+                  placeholder="例：北向，或自行輸入"
+                  helperText="選填；可從清單選擇，也可自行輸入文字"
+                  onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
+                    if (event.key === "Enter") {
+                      save();
+                    }
+                  }}
+                />
+              )}
             />
           </Stack>
           <BrandNotice />

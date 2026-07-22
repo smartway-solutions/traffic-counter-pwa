@@ -24,6 +24,7 @@ export function createInitialState(): IStoredState {
   return {
     roadSection: "",
     userName: "",
+    facingDirection: "",
     theme: "default",
     feedbackSettings: structuredClone(DEFAULT_FEEDBACK_SETTINGS),
     autoSaveEnabled: false,

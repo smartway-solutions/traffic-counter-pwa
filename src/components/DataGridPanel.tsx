@@ -3,14 +3,19 @@ import {
   ClientSideRowModelModule,
   CsvExportModule,
   ModuleRegistry,
+  NumberFilterModule,
   PaginationModule,
+  TextFilterModule,
   themeQuartz,
+  type CsvExportParams,
   type GridApi,
   type GridReadyEvent
 } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
+import JSZip from "jszip";
 import { useEffect, useRef, type SyntheticEvent } from "react";
 import type { IAggregateRow, ICountRecord, IStatisticsRow } from "../types.ts";
+import { downloadBlob } from "../utils/downloadBlob.ts";
 import {
   AGGREGATE_COLUMNS,
   COUNT_COLUMNS,
@@ -19,13 +24,28 @@ import {
   STATISTICS_COLUMNS
 } from "./gridColumns.ts";
 
-ModuleRegistry.registerModules([ClientSideRowModelModule, CsvExportModule, PaginationModule]);
+ModuleRegistry.registerModules([
+  ClientSideRowModelModule,
+  CsvExportModule,
+  PaginationModule,
+  TextFilterModule,
+  NumberFilterModule
+]);
 
 export type TGridView = "counts" | "saves" | "aggregate" | "statistics";
 
 export interface IExportRequest {
   view: TGridView;
   token: number;
+}
+
+export interface IZipExportRequest {
+  token: number;
+}
+
+export interface IZipExportResult {
+  success: boolean;
+  message: string;
 }
 
 export interface IDataGridPanelProps {
@@ -36,24 +56,47 @@ export interface IDataGridPanelProps {
   aggregateRows: IAggregateRow[];
   statisticsRows: IStatisticsRow[];
   exportRequest: IExportRequest | null;
+  zipExportRequest: IZipExportRequest | null;
+  onZipExportResult: (result: IZipExportResult) => void;
 }
 
 const gridTheme = themeQuartz;
+const ALL_VIEWS: TGridView[] = ["counts", "saves", "aggregate", "statistics"];
+
+const csvExportParams: CsvExportParams = {
+  prependContent: "\uFEFF",
+  processCellCallback: ({ value }: { value: unknown }) => {
+    const text = value === null || value === undefined ? "" : String(value);
+    return /^[+\-=@\t\r]/.test(text) ? `'${text}` : text;
+  }
+};
 
 function exportGrid(api: GridApi, viewName: TGridView): void {
   api.exportDataAsCsv({
-    fileName: `traffic-counter-${viewName}-${new Date().toISOString().replaceAll(":", "-")}.csv`,
-    prependContent: "\uFEFF",
-    processCellCallback: ({ value }: { value: unknown }) => {
-      const text = value === null || value === undefined ? "" : String(value);
-      return /^[+\-=@\t\r]/.test(text) ? `'${text}` : text;
-    }
+    ...csvExportParams,
+    fileName: `traffic-counter-${viewName}-${new Date().toISOString().replaceAll(":", "-")}.csv`
   });
+}
+
+async function exportAllAsZip(gridApis: Partial<Record<TGridView, GridApi>>): Promise<void> {
+  const timestamp = new Date().toISOString().replaceAll(":", "-");
+  const zip = new JSZip();
+  for (const view of ALL_VIEWS) {
+    const api = gridApis[view];
+    if (api === undefined) {
+      throw new Error(`AG Grid \u5C1A\u672A\u521D\u59CB\u5316\uFF1A${view}`);
+    }
+    const csv = api.getDataAsCsv(csvExportParams) ?? "";
+    zip.file(`traffic-counter-${view}-${timestamp}.csv`, csv);
+  }
+  const blob = await zip.generateAsync({ type: "blob" });
+  downloadBlob(blob, `traffic-counter-all-${timestamp}.zip`);
 }
 
 export function DataGridPanel(props: IDataGridPanelProps): React.JSX.Element {
   const gridApis = useRef<Partial<Record<TGridView, GridApi>>>({});
   const handledExportToken = useRef<number | null>(null);
+  const handledZipToken = useRef<number | null>(null);
 
   useEffect(() => {
     const request = props.exportRequest;
@@ -67,6 +110,22 @@ export function DataGridPanel(props: IDataGridPanelProps): React.JSX.Element {
     handledExportToken.current = request.token;
     exportGrid(api, request.view);
   }, [props.exportRequest]);
+
+  useEffect(() => {
+    const request = props.zipExportRequest;
+    if (request === null || request.token === handledZipToken.current) {
+      return;
+    }
+    handledZipToken.current = request.token;
+    exportAllAsZip(gridApis.current)
+      .then(() => props.onZipExportResult({ success: true, message: "已將所有資料打包為 ZIP 並下載。" }))
+      .catch((error: unknown) => {
+        props.onZipExportResult({
+          success: false,
+          message: error instanceof Error ? error.message : String(error)
+        });
+      });
+  }, [props.zipExportRequest]);
 
   function registerGrid(viewName: TGridView, event: GridReadyEvent): void {
     gridApis.current[viewName] = event.api;

@@ -1,9 +1,36 @@
+import JSZip from "jszip";
+import {
+  AGGREGATE_COLUMNS,
+  COUNT_COLUMNS,
+  SAVE_COLUMNS,
+  STATISTICS_COLUMNS
+} from "../../../components/gridColumns.ts";
 import { createEmptyCounts } from "../../../constants.ts";
 import { persistStoredState } from "../../../hooks/usePersistentState.ts";
+import { buildAggregateRows, buildStatisticsRows } from "../../../statistics.ts";
 import type { IStoredState, TSaveType } from "../../../types.ts";
+import { downloadBlob } from "../../../utils/downloadBlob.ts";
+import { buildCsvFromColumns } from "../../../utils/exportCsv.ts";
 import type { IGeolocationState } from "../../geolocation/types/gpsTypes.ts";
 import { createSaveRecord, createScreenshotFilename } from "../utils/counterRecords.ts";
-import { captureElementAsPng } from "./saveSnapshot.ts";
+import { renderElementToPngBlob } from "./saveSnapshot.ts";
+
+async function buildSaveBundleZip(state: IStoredState, screenshotFilename: string, pngBlob: Blob): Promise<Blob> {
+  const zip = new JSZip();
+  zip.file(screenshotFilename, pngBlob);
+
+  const countRows = state.records.filter((record) => record.eventType === "count");
+  const saveRows = state.records.filter((record) => record.eventType === "save");
+  const aggregateRows = buildAggregateRows(state.counts, state.records);
+  const statisticsRows = buildStatisticsRows(aggregateRows, state.records, state.roadSection, state.userName);
+
+  zip.file("計數明細.csv", buildCsvFromColumns(COUNT_COLUMNS, countRows));
+  zip.file("保存紀錄.csv", buildCsvFromColumns(SAVE_COLUMNS, saveRows));
+  zip.file("合計資料.csv", buildCsvFromColumns(AGGREGATE_COLUMNS, aggregateRows));
+  zip.file("統計資料.csv", buildCsvFromColumns(STATISTICS_COLUMNS, statisticsRows));
+
+  return zip.generateAsync({ type: "blob" });
+}
 
 export interface ICounterNotice {
   message: string;
@@ -44,7 +71,7 @@ export async function saveCounterSnapshot(options: ISaveCounterOptions): Promise
     pendingRecorded = true;
     applyState(pendingState);
 
-    await captureElementAsPng(captureTarget, screenshotFilename);
+    const pngBlob = await renderElementToPngBlob(captureTarget);
 
     const latest = getLatestState();
     const completedState: IStoredState = {
@@ -54,10 +81,13 @@ export async function saveCounterSnapshot(options: ISaveCounterOptions): Promise
         record.id === saveId ? { ...record, saveStatus: "completed" } : record
       )
     };
+    const zipBlob = await buildSaveBundleZip(completedState, screenshotFilename, pngBlob);
+    downloadBlob(zipBlob, screenshotFilename.replace(/\.png$/i, ".zip"));
+
     persistStoredState(completedState);
     applyState(completedState);
     return {
-      message: `${saveType === "quick_save" ? "Quick Save" : "Auto Save"} 完成：截圖已下載，主畫面已歸零`,
+      message: `${saveType === "quick_save" ? "Quick Save" : "Auto Save"} 完成：截圖與資料已打包下載，主畫面已歸零`,
       severity: "success"
     };
   } catch (error) {

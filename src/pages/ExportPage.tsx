@@ -1,6 +1,8 @@
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import FileDownloadRoundedIcon from "@mui/icons-material/FileDownloadRounded";
+import FolderZipRoundedIcon from "@mui/icons-material/FolderZipRounded";
 import {
+  Alert,
   AppBar,
   Box,
   Button,
@@ -10,6 +12,7 @@ import {
   DialogContentText,
   DialogTitle,
   IconButton,
+  Snackbar,
   Toolbar,
   Typography
 } from "@mui/material";
@@ -17,7 +20,13 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { useAppContext } from "../appContext.ts";
 import { BrandNotice } from "../components/BrandNotice.tsx";
-import { DataGridPanel, type IExportRequest, type TGridView } from "../components/DataGridPanel.tsx";
+import {
+  DataGridPanel,
+  type IExportRequest,
+  type IZipExportRequest,
+  type IZipExportResult,
+  type TGridView
+} from "../components/DataGridPanel.tsx";
 import { buildAggregateRows, buildStatisticsRows } from "../statistics.ts";
 
 const VIEW_LABELS: Record<TGridView, string> = {
@@ -30,9 +39,12 @@ const VIEW_LABELS: Record<TGridView, string> = {
 export function ExportPage(): React.JSX.Element {
   const { state } = useAppContext();
   const navigate = useNavigate();
-  const [view, setView] = useState<TGridView>("counts");
+  const [view, setView] = useState<TGridView>("saves");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [exportRequest, setExportRequest] = useState<IExportRequest | null>(null);
+  const [zipExportRequest, setZipExportRequest] = useState<IZipExportRequest | null>(null);
+  const [zipping, setZipping] = useState(false);
+  const [zipResult, setZipResult] = useState<IZipExportResult | null>(null);
 
   const aggregateRows = useMemo(
     () => buildAggregateRows(state.counts, state.records),
@@ -56,6 +68,16 @@ export function ExportPage(): React.JSX.Element {
     setConfirmOpen(false);
   }
 
+  function downloadZip(): void {
+    setZipping(true);
+    setZipExportRequest({ token: Date.now() });
+  }
+
+  function handleZipResult(result: IZipExportResult): void {
+    setZipping(false);
+    setZipResult(result);
+  }
+
   return (
     <Box sx={{ height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <AppBar position="static" elevation={1} color="inherit">
@@ -66,6 +88,14 @@ export function ExportPage(): React.JSX.Element {
           <Typography variant="subtitle1" fontWeight={900} sx={{ flex: 1 }} noWrap>
             匯出與統計
           </Typography>
+          <Button
+            variant="outlined"
+            startIcon={<FolderZipRoundedIcon />}
+            onClick={downloadZip}
+            disabled={zipping}
+          >
+            {zipping ? "打包中…" : "打包下載 ZIP"}
+          </Button>
           <Button
             variant="contained"
             startIcon={<FileDownloadRoundedIcon />}
@@ -85,8 +115,25 @@ export function ExportPage(): React.JSX.Element {
           aggregateRows={aggregateRows}
           statisticsRows={statisticsRows}
           exportRequest={exportRequest}
+          zipExportRequest={zipExportRequest}
+          onZipExportResult={handleZipResult}
         />
       </Box>
+
+      <Snackbar
+        open={zipResult !== null}
+        autoHideDuration={3200}
+        onClose={() => setZipResult(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          severity={zipResult?.success ? "success" : "warning"}
+          variant="filled"
+          onClose={() => setZipResult(null)}
+        >
+          {zipResult?.message}
+        </Alert>
+      </Snackbar>
 
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)} fullWidth maxWidth="xs">
         <DialogTitle fontWeight={900}>匯出 CSV</DialogTitle>
