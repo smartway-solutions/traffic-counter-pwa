@@ -12,18 +12,22 @@ export class GeolocationRequestError extends Error {
   }
 }
 
-function toSnapshot(position: GeolocationPosition): IGpsSnapshot {
+function toSnapshot(position: GeolocationPosition, sampledAtMs: number): IGpsSnapshot {
   return {
     latitude: position.coords.latitude,
     longitude: position.coords.longitude,
-    accuracyMeters: position.coords.accuracy
+    accuracyMeters: position.coords.accuracy,
+    sampledAtMs
   };
 }
 
 export function requestGpsSample(): Promise<IGpsSample> {
   return new Promise((resolve, reject) => {
     navigator.geolocation.getCurrentPosition(
-      (position) => resolve({ position: toSnapshot(position), sampledAtMs: Date.now() }),
+      (position) => {
+        const sampledAtMs = Date.now();
+        resolve({ position: toSnapshot(position, sampledAtMs), sampledAtMs });
+      },
       (error) => reject(new GeolocationRequestError(error.message, error.code)),
       { enableHighAccuracy: true, maximumAge: 0, timeout: GPS_SAMPLE_TIMEOUT_MS }
     );
