@@ -4,20 +4,23 @@
 
 - 匯出頁改成先看「保存紀錄」，欄位順序改成狀態、時間戳、七種車輛在前，其他資訊在後。
 - 「計數明細」欄位順序改成車種、累計操作後、時間戳在前，其他資訊在後。
-- 匯出頁新增「打包下載 ZIP」，一次把計數明細、保存紀錄、合計資料、統計資料四張表打包成一個 ZIP 下載。
-- Quick Save／Auto Save 改成把主畫面截圖與四張資料表一起打包成一個 ZIP 下載，不再只下載單張截圖。
+- 匯出頁移除「匯出 CSV」單分頁匯出；改成單一「打包下載 ZIP」按鈕，一次把計數明細、保存紀錄、合計資料、統計資料四張表打包成一個 ZIP 下載。
+- Quick Save／Auto Save 改成分別下載：主畫面截圖 PNG 一份，另外四張資料表打包成一個不含圖片的 ZIP，兩者依序各自下載。
 - 作業設定新增「面向方向」欄位：可從常見方向清單直接選，也能自行輸入文字；選填，不影響既有路段／使用者流程。
 - 右側功能選單移除頂部「功能／右側 Sheet」提示文字，底部新增「關閉」按鈕。
 - 右側功能選單新增「分享 App」，會呼叫手機的分享功能分享安裝連結；不支援分享的瀏覽器會改成複製連結到剪貼簿。
+- 修正匯出頁主控台一直出現 AG Grid filter module 錯誤訊息的問題。
 
 ## 開發者
 
 - `gridColumns.ts` 的 `COUNT_COLUMNS`／`SAVE_COLUMNS` 欄位順序調整；新增 `facingDirection`（面向方向）欄位。
 - `IStoredState`／`ICountRecord` 新增 `facingDirection: string`；`usePersistentState.ts` 對舊資料與畸形資料正規化為空字串。
 - 新增 `src/utils/downloadBlob.ts`、`src/utils/exportCsv.ts`：`buildCsvFromColumns()` 不依賴 AG Grid 實例，直接依欄位定義序列化 CSV，供 Quick Save／Auto Save 在匯出頁未掛載時使用。
-- `saveSnapshot.ts` 的 `captureElementAsPng()` 改為 `renderElementToPngBlob()`，回傳 Blob 而非直接下載，讓呼叫端可與 CSV 一起打包。
+- `saveSnapshot.ts` 的 `captureElementAsPng()` 改為 `renderElementToPngBlob()`，回傳 Blob 而非直接下載，讓呼叫端可與 CSV 一起打包或分開下載。
 - 新增依賴 `jszip`，用於瀏覽器端產生 ZIP。
-- `DataGridPanel.tsx` 新增 `zipExportRequest`／`onZipExportResult`，透過既有 GridApi 以 `getDataAsCsv()` 匯出全部四個檢視並打包下載。
+- `DataGridPanel.tsx` 新增 `zipExportRequest`／`onZipExportResult`，透過既有 GridApi 以 `getDataAsCsv()` 匯出全部四個檢視並打包下載；移除單分頁 `exportRequest` 相關程式碼。
+- `ModuleRegistry` 補上 `TextFilterModule`／`NumberFilterModule`，解決 `DEFAULT_COL_DEF` 的 `filter: true` 缺少對應模組的 AG Grid error #200。
+- Quick Save／Auto Save 的兩個下載之間加入約 300ms 間隔，降低被瀏覽器判定為連續多檔下載而攔截的機率（詳見對話中的手機瀏覽器限制說明）。
 
 # 0.6.0
 

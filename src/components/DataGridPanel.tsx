@@ -34,11 +34,6 @@ ModuleRegistry.registerModules([
 
 export type TGridView = "counts" | "saves" | "aggregate" | "statistics";
 
-export interface IExportRequest {
-  view: TGridView;
-  token: number;
-}
-
 export interface IZipExportRequest {
   token: number;
 }
@@ -55,7 +50,6 @@ export interface IDataGridPanelProps {
   saveRows: ICountRecord[];
   aggregateRows: IAggregateRow[];
   statisticsRows: IStatisticsRow[];
-  exportRequest: IExportRequest | null;
   zipExportRequest: IZipExportRequest | null;
   onZipExportResult: (result: IZipExportResult) => void;
 }
@@ -70,13 +64,6 @@ const csvExportParams: CsvExportParams = {
     return /^[+\-=@\t\r]/.test(text) ? `'${text}` : text;
   }
 };
-
-function exportGrid(api: GridApi, viewName: TGridView): void {
-  api.exportDataAsCsv({
-    ...csvExportParams,
-    fileName: `traffic-counter-${viewName}-${new Date().toISOString().replaceAll(":", "-")}.csv`
-  });
-}
 
 async function exportAllAsZip(gridApis: Partial<Record<TGridView, GridApi>>): Promise<void> {
   const timestamp = new Date().toISOString().replaceAll(":", "-");
@@ -95,21 +82,7 @@ async function exportAllAsZip(gridApis: Partial<Record<TGridView, GridApi>>): Pr
 
 export function DataGridPanel(props: IDataGridPanelProps): React.JSX.Element {
   const gridApis = useRef<Partial<Record<TGridView, GridApi>>>({});
-  const handledExportToken = useRef<number | null>(null);
   const handledZipToken = useRef<number | null>(null);
-
-  useEffect(() => {
-    const request = props.exportRequest;
-    if (request === null || request.token === handledExportToken.current) {
-      return;
-    }
-    const api = gridApis.current[request.view];
-    if (api === undefined) {
-      throw new Error(`AG Grid 尚未初始化：${request.view}`);
-    }
-    handledExportToken.current = request.token;
-    exportGrid(api, request.view);
-  }, [props.exportRequest]);
 
   useEffect(() => {
     const request = props.zipExportRequest;

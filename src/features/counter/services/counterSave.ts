@@ -15,9 +15,9 @@ import type { IGeolocationState } from "../../geolocation/types/gpsTypes.ts";
 import { createSaveRecord, createScreenshotFilename } from "../utils/counterRecords.ts";
 import { renderElementToPngBlob } from "./saveSnapshot.ts";
 
-async function buildSaveBundleZip(state: IStoredState, screenshotFilename: string, pngBlob: Blob): Promise<Blob> {
+/** 只打包 CSV 資料，不含截圖；截圖已由 renderElementToPngBlob() 另外單獨下載，避免重複。 */
+async function buildDataOnlyZip(state: IStoredState): Promise<Blob> {
   const zip = new JSZip();
-  zip.file(screenshotFilename, pngBlob);
 
   const countRows = state.records.filter((record) => record.eventType === "count");
   const saveRows = state.records.filter((record) => record.eventType === "save");
@@ -81,13 +81,17 @@ export async function saveCounterSnapshot(options: ISaveCounterOptions): Promise
         record.id === saveId ? { ...record, saveStatus: "completed" } : record
       )
     };
-    const zipBlob = await buildSaveBundleZip(completedState, screenshotFilename, pngBlob);
-    downloadBlob(zipBlob, screenshotFilename.replace(/\.png$/i, ".zip"));
+    const dataZipBlob = await buildDataOnlyZip(completedState);
+    downloadBlob(pngBlob, screenshotFilename);
+    // 瀏覽器對「同一頁面連續觸發多個下載」有節流／攔截機制；間隔一小段時間送出第二個下載，
+    // 降低被視為一次性多檔下載而被封鎖或跳出「允許多個下載」提示的機率。
+    await new Promise((resolve) => window.setTimeout(resolve, 300));
+    downloadBlob(dataZipBlob, screenshotFilename.replace(/\.png$/i, "-data.zip"));
 
     persistStoredState(completedState);
     applyState(completedState);
     return {
-      message: `${saveType === "quick_save" ? "Quick Save" : "Auto Save"} 完成：截圖與資料已打包下載，主畫面已歸零`,
+      message: `${saveType === "quick_save" ? "Quick Save" : "Auto Save"} 完成：截圖與資料已分別下載，主畫面已歸零`,
       severity: "success"
     };
   } catch (error) {
