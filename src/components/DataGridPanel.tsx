@@ -71,7 +71,7 @@ async function exportAllAsZip(gridApis: Partial<Record<TGridView, GridApi>>): Pr
   for (const view of ALL_VIEWS) {
     const api = gridApis[view];
     if (api === undefined) {
-      throw new Error(`AG Grid \u5C1A\u672A\u521D\u59CB\u5316\uFF1A${view}`);
+      throw new Error(`AG Grid 尚未初始化：${view}`);
     }
     const csv = api.getDataAsCsv(csvExportParams) ?? "";
     zip.file(`traffic-counter-${view}-${timestamp}.csv`, csv);
