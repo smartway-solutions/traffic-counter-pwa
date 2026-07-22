@@ -1,6 +1,7 @@
 import RemoveRoundedIcon from "@mui/icons-material/RemoveRounded";
 import { ButtonBase, IconButton } from "@mui/material";
-import type { MouseEvent } from "react";
+import { useRef } from "react";
+import type { MouseEvent, PointerEvent as ReactPointerEvent } from "react";
 import {
   getCounterCardVisual,
   isDarkTheme,
@@ -22,14 +23,48 @@ export interface ICounterCardProps {
 const DECREASE_FLASH = "#D93025";
 
 export function CounterCard(props: ICounterCardProps): React.JSX.Element {
+  const lastTouchActivation = useRef(Number.NEGATIVE_INFINITY);
   const visual = getCounterCardVisual(props.themeName, props.vehicleType);
   const dark = isDarkTheme(props.themeName);
   const flashColor =
     props.feedback === null ? null : props.feedback === "increase" ? visual.accent : DECREASE_FLASH;
   const isList = props.variant === "list";
 
-  function handleDecrease(event: MouseEvent<HTMLButtonElement>): void {
+  function isTouchLikePointer(pointerType: string): boolean {
+    return pointerType === "touch" || pointerType === "pen";
+  }
+
+  function isCompatibilityClick(event: MouseEvent<HTMLElement>): boolean {
+    const nativePointerType =
+      "pointerType" in event.nativeEvent ? String(event.nativeEvent.pointerType) : "";
+    if (event.detail === 0) return false;
+    if (nativePointerType !== "") return isTouchLikePointer(nativePointerType);
+    return event.timeStamp - lastTouchActivation.current < 750;
+  }
+
+  function handleIncreasePointerDown(event: ReactPointerEvent<HTMLDivElement>): void {
+    if (!isTouchLikePointer(event.pointerType)) return;
+    event.preventDefault();
+    lastTouchActivation.current = event.timeStamp;
+    props.onIncrease();
+  }
+
+  function handleIncreaseClick(event: MouseEvent<HTMLDivElement>): void {
+    if (isCompatibilityClick(event)) return;
+    props.onIncrease();
+  }
+
+  function handleDecreasePointerDown(event: ReactPointerEvent<HTMLButtonElement>): void {
     event.stopPropagation();
+    if (!isTouchLikePointer(event.pointerType)) return;
+    event.preventDefault();
+    lastTouchActivation.current = event.timeStamp;
+    props.onDecrease();
+  }
+
+  function handleDecreaseClick(event: MouseEvent<HTMLButtonElement>): void {
+    event.stopPropagation();
+    if (isCompatibilityClick(event)) return;
     props.onDecrease();
   }
 
@@ -37,7 +72,8 @@ export function CounterCard(props: ICounterCardProps): React.JSX.Element {
     <IconButton
       aria-label={`${props.vehicleType} 減一`}
       aria-disabled={props.count === 0}
-      onClick={handleDecrease}
+      onPointerDown={handleDecreasePointerDown}
+      onClick={handleDecreaseClick}
       size="small"
       sx={{
         width: isList ? 48 : 44,
@@ -64,7 +100,8 @@ export function CounterCard(props: ICounterCardProps): React.JSX.Element {
   return (
     <ButtonBase
       component="div"
-      onClick={props.onIncrease}
+      onPointerDown={handleIncreasePointerDown}
+      onClick={handleIncreaseClick}
       aria-label={`${props.vehicleType} 加一，目前 ${props.count}`}
       sx={{
         minHeight: 0,
