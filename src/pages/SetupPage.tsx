@@ -10,7 +10,7 @@ import {
   TextField,
   Typography
 } from "@mui/material";
-import { useState, type ChangeEvent } from "react";
+import { useState, type ChangeEvent, type KeyboardEvent } from "react";
 import { useNavigate } from "react-router";
 import { isSetupComplete, useAppContext } from "../appContext.ts";
 import { BrandNotice } from "../components/BrandNotice.tsx";
@@ -78,7 +78,7 @@ export function SetupPage(): React.JSX.Element {
               placeholder="例：王小明"
               fullWidth
               required
-              onKeyDown={(event) => {
+              onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
                 if (event.key === "Enter") {
                   save();
                 }

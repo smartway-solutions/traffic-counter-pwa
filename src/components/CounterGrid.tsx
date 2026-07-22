@@ -29,14 +29,14 @@ const LAYOUT_SX: Record<TCounterLayout, StyleObject> = {
   grid: {
     display: "grid",
     gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-    gridTemplateRows: "repeat(3, minmax(0, 1fr))",
+    gridTemplateRows: "repeat(4, minmax(0, 1fr))",
     gap: { xs: 0.8, sm: 1.1 },
     px: { xs: 0.8, sm: 1.1 },
     pt: { xs: 0.8, sm: 1.1 },
     [TIGHT_SCREEN]: { gap: 0.4, px: 0.45, pt: 0.45 },
     "@media (min-width: 680px) and (orientation: landscape)": {
       gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-      gridTemplateRows: "repeat(2, minmax(0, 1fr))"
+      gridTemplateRows: "repeat(3, minmax(0, 1fr))"
     }
   },
   list: {
@@ -48,7 +48,7 @@ const LAYOUT_SX: Record<TCounterLayout, StyleObject> = {
   mosaic: {
     display: "grid",
     gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-    gridTemplateRows: "repeat(4, minmax(0, 1fr))",
+    gridTemplateRows: "repeat(5, minmax(0, 1fr))",
     gap: 0.7,
     [TIGHT_SCREEN]: { gap: 0.4, px: 0.45, pt: 0.45 }
   },
@@ -61,7 +61,15 @@ const LAYOUT_SX: Record<TCounterLayout, StyleObject> = {
   }
 };
 
-const KEYPAD_COLUMNS = ["1 / span 3", "4 / span 3", "1 / span 2", "3 / span 2", "5 / span 2", "2 / span 4"];
+const KEYPAD_COLUMNS = [
+  "1 / span 3",
+  "4 / span 3",
+  "1 / span 2",
+  "3 / span 2",
+  "5 / span 2",
+  "1 / span 3",
+  "4 / span 3"
+];
 
 function getItemSx(layout: TCounterLayout, index: number): StyleObject {
   const common = { minWidth: 0, minHeight: 0 };

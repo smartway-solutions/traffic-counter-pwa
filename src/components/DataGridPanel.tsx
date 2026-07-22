@@ -11,11 +11,17 @@ import {
 import { AgGridReact } from "ag-grid-react";
 import { useEffect, useRef, type SyntheticEvent } from "react";
 import type { IAggregateRow, ICountRecord, IStatisticsRow } from "../types.ts";
-import { AGGREGATE_COLUMNS, DEFAULT_COL_DEF, RAW_COLUMNS, STATISTICS_COLUMNS } from "./gridColumns.ts";
+import {
+  AGGREGATE_COLUMNS,
+  COUNT_COLUMNS,
+  DEFAULT_COL_DEF,
+  SAVE_COLUMNS,
+  STATISTICS_COLUMNS
+} from "./gridColumns.ts";
 
 ModuleRegistry.registerModules([ClientSideRowModelModule, CsvExportModule, PaginationModule]);
 
-export type TGridView = "raw" | "aggregate" | "statistics";
+export type TGridView = "counts" | "saves" | "aggregate" | "statistics";
 
 export interface IExportRequest {
   view: TGridView;
@@ -25,7 +31,8 @@ export interface IExportRequest {
 export interface IDataGridPanelProps {
   view: TGridView;
   onViewChange: (view: TGridView) => void;
-  rawRows: ICountRecord[];
+  countRows: ICountRecord[];
+  saveRows: ICountRecord[];
   aggregateRows: IAggregateRow[];
   statisticsRows: IStatisticsRow[];
   exportRequest: IExportRequest | null;
@@ -95,19 +102,32 @@ export function DataGridPanel(props: IDataGridPanelProps): React.JSX.Element {
         variant="scrollable"
         scrollButtons="auto"
       >
-        <Tab value="raw" label={`原始資料 (${props.rawRows.length})`} />
+        <Tab value="counts" label={`計數明細 (${props.countRows.length})`} />
+        <Tab value="saves" label={`保存紀錄 (${props.saveRows.length})`} />
         <Tab value="aggregate" label="合計資料" />
         <Tab value="statistics" label="統計資料" />
       </Tabs>
 
-      <Box sx={gridBoxSx("raw")}>
+      <Box sx={gridBoxSx("counts")}>
         <AgGridReact<ICountRecord>
           theme={gridTheme}
-          rowData={props.rawRows}
-          columnDefs={RAW_COLUMNS}
+          rowData={props.countRows}
+          columnDefs={COUNT_COLUMNS}
           defaultColDef={DEFAULT_COL_DEF}
           getRowId={({ data }: { data: ICountRecord }) => data.id}
-          onGridReady={(event: GridReadyEvent) => registerGrid("raw", event)}
+          onGridReady={(event: GridReadyEvent) => registerGrid("counts", event)}
+          pagination
+          paginationPageSize={20}
+        />
+      </Box>
+      <Box sx={gridBoxSx("saves")}>
+        <AgGridReact<ICountRecord>
+          theme={gridTheme}
+          rowData={props.saveRows}
+          columnDefs={SAVE_COLUMNS}
+          defaultColDef={DEFAULT_COL_DEF}
+          getRowId={({ data }: { data: ICountRecord }) => data.id}
+          onGridReady={(event: GridReadyEvent) => registerGrid("saves", event)}
           pagination
           paginationPageSize={20}
         />

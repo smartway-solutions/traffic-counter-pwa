@@ -21,7 +21,8 @@ import { DataGridPanel, type IExportRequest, type TGridView } from "../component
 import { buildAggregateRows, buildStatisticsRows } from "../statistics.ts";
 
 const VIEW_LABELS: Record<TGridView, string> = {
-  raw: "原始資料",
+  counts: "計數明細",
+  saves: "保存紀錄",
   aggregate: "合計資料",
   statistics: "統計資料"
 };
@@ -29,13 +30,21 @@ const VIEW_LABELS: Record<TGridView, string> = {
 export function ExportPage(): React.JSX.Element {
   const { state } = useAppContext();
   const navigate = useNavigate();
-  const [view, setView] = useState<TGridView>("raw");
+  const [view, setView] = useState<TGridView>("counts");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [exportRequest, setExportRequest] = useState<IExportRequest | null>(null);
 
   const aggregateRows = useMemo(
     () => buildAggregateRows(state.counts, state.records),
     [state.counts, state.records]
+  );
+  const countRows = useMemo(
+    () => state.records.filter((record) => record.eventType === "count"),
+    [state.records]
+  );
+  const saveRows = useMemo(
+    () => state.records.filter((record) => record.eventType === "save"),
+    [state.records]
   );
   const statisticsRows = useMemo(
     () => buildStatisticsRows(aggregateRows, state.records, state.roadSection, state.userName),
@@ -71,7 +80,8 @@ export function ExportPage(): React.JSX.Element {
         <DataGridPanel
           view={view}
           onViewChange={setView}
-          rawRows={state.records}
+          countRows={countRows}
+          saveRows={saveRows}
           aggregateRows={aggregateRows}
           statisticsRows={statisticsRows}
           exportRequest={exportRequest}
@@ -83,7 +93,13 @@ export function ExportPage(): React.JSX.Element {
         <DialogContent>
           <DialogContentText>
             將匯出「{VIEW_LABELS[view]}」為 UTF-8（含 BOM）CSV，
-            共 {view === "raw" ? state.records.length : view === "aggregate" ? aggregateRows.length : statisticsRows.length} 筆。
+            共 {view === "counts"
+              ? countRows.length
+              : view === "saves"
+                ? saveRows.length
+                : view === "aggregate"
+                  ? aggregateRows.length
+                  : statisticsRows.length} 筆。
           </DialogContentText>
           <BrandNotice />
         </DialogContent>
