@@ -4,5 +4,6 @@
 - Header 提供 `Quick Save`；保存期間按鈕停用，避免重複保存。
 - 漢堡按鈕明確使用主題 AppBar 前景色，避免深淺主題下不可見。
 - 漢堡按鈕開啟右側 Sheet，不使用錨點 Menu。
+- Sheet 由獨立 `CounterActionDrawer` 組件負責，Header 僅呈現頁首布局。
 - Sheet 首項為 `Auto Save` 開關；目前固定每 15 分鐘檢查，工作區為 0 時略過。
 - Sheet 項目：匯出與統計、編輯路段／使用者、震動與音效、使用手冊、版本變更說明、更改主題、清除本機資料。

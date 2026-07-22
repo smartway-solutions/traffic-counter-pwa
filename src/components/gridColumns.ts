@@ -17,6 +17,15 @@ function getGpsText(record: ICountRecord): string {
   return `${record.gps.latitude.toFixed(6)}, ${record.gps.longitude.toFixed(6)}`;
 }
 
+/** 事件時間與 GPS 實際取樣時間的差距；用來判斷座標是幾秒前定位的。 */
+function getGpsDelaySeconds(record: ICountRecord): number | null {
+  if (record.gps === null || record.gps.sampledAtMs === null) {
+    return null;
+  }
+  const eventMs = new Date(record.timestampIso).getTime();
+  return Math.max(0, (eventMs - record.gps.sampledAtMs) / 1_000);
+}
+
 function getActionLabel(value: unknown): string {
   if (value === "increase") {
     return "增加";
@@ -87,6 +96,13 @@ export const COUNT_COLUMNS: ColDef<ICountRecord>[] = [
     valueFormatter: ({ value }: { value: unknown }) =>
       typeof value === "number" ? value.toFixed(1) : ""
   },
+  {
+    headerName: "GPS 延遲(秒)",
+    valueGetter: ({ data }: { data: ICountRecord | undefined }) => (data ? getGpsDelaySeconds(data) : null),
+    valueFormatter: ({ value }: { value: unknown }) =>
+      typeof value === "number" ? value.toFixed(1) : "",
+    minWidth: 110
+  },
   { field: "roadSection", headerName: "路段", minWidth: 130 },
   { field: "userName", headerName: "使用者", minWidth: 100 },
   { field: "id", headerName: "事件 ID", minWidth: 180 },
@@ -128,6 +144,13 @@ export const SAVE_COLUMNS: ColDef<ICountRecord>[] = [
     headerName: "精度(m)",
     valueGetter: ({ data }: { data: ICountRecord | undefined }) => data?.gps?.accuracyMeters ?? null,
     valueFormatter: ({ value }: { value: unknown }) => (typeof value === "number" ? value.toFixed(1) : "")
+  },
+  {
+    headerName: "GPS 延遲(秒)",
+    valueGetter: ({ data }: { data: ICountRecord | undefined }) => (data ? getGpsDelaySeconds(data) : null),
+    valueFormatter: ({ value }: { value: unknown }) =>
+      typeof value === "number" ? value.toFixed(1) : "",
+    minWidth: 110
   },
   { field: "roadSection", headerName: "路段", minWidth: 130 },
   { field: "userName", headerName: "使用者", minWidth: 100 },

@@ -21,6 +21,8 @@ export interface IGpsSnapshot {
   latitude: number;
   longitude: number;
   accuracyMeters: number;
+  /** 實際定位取樣時間；舊資料沒有此欄位時為 null。 */
+  sampledAtMs: number | null;
 }
 
 /**

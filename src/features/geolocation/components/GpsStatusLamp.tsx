@@ -1,5 +1,5 @@
 import { Box, Typography } from "@mui/material";
-import type { TGeolocationStatus } from "../hooks/useGeolocation.ts";
+import type { TGeolocationStatus } from "../types/gpsTypes.ts";
 
 export interface IGpsStatusLampProps {
   status: TGeolocationStatus;

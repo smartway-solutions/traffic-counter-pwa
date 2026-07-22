@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider, createHashRouter } from "react-router";
 import { RootLayout } from "./RootLayout.tsx";
-import { CounterPage } from "./pages/CounterPage.tsx";
+import { CounterPage } from "./features/counter/pages/CounterPage.tsx";
 
 const router = createHashRouter([
   {
@@ -20,7 +20,7 @@ const router = createHashRouter([
       },
       {
         path: "feedback",
-        lazy: () => import("./pages/FeedbackSettingsPage.tsx").then(({ FeedbackSettingsPage: Component }) => ({ Component }))
+        lazy: () => import("./features/feedback/pages/FeedbackSettingsPage.tsx").then(({ FeedbackSettingsPage: Component }) => ({ Component }))
       },
       {
         path: "manual",

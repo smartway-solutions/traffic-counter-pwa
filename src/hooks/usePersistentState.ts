@@ -4,6 +4,7 @@ import { isThemeName } from "../themes.ts";
 import type {
   ICountRecord,
   IFeedbackSettings,
+  IGpsSnapshot,
   IStoredState,
   TVehicleCounts,
   TVehicleType
@@ -32,6 +33,27 @@ function mergeCounts(initial: TVehicleCounts, stored: Partial<TVehicleCounts> | 
 
 function isVehicleType(value: unknown): value is TVehicleType {
   return typeof value === "string" && VEHICLE_TYPES.includes(value as TVehicleType);
+}
+
+// 損壞或舊格式的 GPS 資料若原樣放行，匯出頁呼叫 .toFixed() 時會拋例外並整表白畫面。
+function normalizeGpsSnapshot(value: unknown): IGpsSnapshot | null {
+  if (typeof value !== "object" || value === null) {
+    return null;
+  }
+  const snapshot = value as Partial<IGpsSnapshot>;
+  if (
+    typeof snapshot.latitude !== "number" ||
+    typeof snapshot.longitude !== "number" ||
+    typeof snapshot.accuracyMeters !== "number"
+  ) {
+    return null;
+  }
+  return {
+    latitude: snapshot.latitude,
+    longitude: snapshot.longitude,
+    accuracyMeters: snapshot.accuracyMeters,
+    sampledAtMs: typeof snapshot.sampledAtMs === "number" ? snapshot.sampledAtMs : null
+  };
 }
 
 function normalizeRecord(value: unknown): ICountRecord | null {
@@ -70,7 +92,7 @@ function normalizeRecord(value: unknown): ICountRecord | null {
       typeof record.workingCountAfter === "number" ? record.workingCountAfter : legacyCountAfter,
     timestampIso: record.timestampIso,
     localTime: typeof record.localTime === "string" ? record.localTime : record.timestampIso,
-    gps: record.gps ?? null,
+    gps: normalizeGpsSnapshot(record.gps),
     roadSection: typeof record.roadSection === "string" ? record.roadSection : "",
     userName: typeof record.userName === "string" ? record.userName : "",
     screenshotFilename:

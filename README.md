@@ -25,7 +25,8 @@ Vite + React + TypeScript + React Router 7（hash 路由）+ Material UI + AG Gr
 - 10 款手機優先主題；包含七車種網格、七列清單、非對稱資訊牆與 2－3－2 鍵盤。
 - Header 提供 Quick Save；右側 Sheet 可切換每 15 分鐘 Auto Save。
 - Save 完成截圖下載後只清除主畫面工作區數字，累計與原始事件保持不變。
-- GPS 燈號：就緒、取得中、權限未允許；GPS 不可用仍可計數。
+- GPS 每分鐘切成六個固定 10 秒視窗，每個視窗最多取樣一次。計數或儲存時使用最近一次成功定位；若定位已超過 20 秒，仍會正常保存計數或 Save 事件，只是該筆事件不附帶 GPS 座標。按鈕本身不會觸發定位。
+- GPS 燈號：就緒、取得中、最近樣本逾時、權限未允許；GPS 不可用仍可計數。
 - 單人單日上限 10,000 筆；達上限拒絕新增並提示先匯出。
 - CSV 使用 UTF-8 BOM 並處理公式注入風險。
 - 使用手冊影片位於 `public/manual/`，不納入 PWA 預快取。
@@ -87,6 +88,10 @@ pnpm preview
 ```
 
 `dist/` 可部署到任何 HTTPS 靜態網站服務。Hash 路由不需要伺服器 rewrite 設定。
+
+## 程式結構
+
+主要功能採 feature-first 目錄：`src/features/counter`、`src/features/feedback`、`src/features/geolocation`。各 feature 依需要分成 `pages`、`components`、`hooks`、`services`、`types`、`utils` 與 `docs`；頁面元件以布局組合為主，共用主題、持久化與跨功能資料型別留在 `src/` 共用層。
 
 ## 授權
 

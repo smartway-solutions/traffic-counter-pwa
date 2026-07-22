@@ -1,6 +1,6 @@
 import { useOutletContext } from "react-router";
 import type { Dispatch, SetStateAction } from "react";
-import type { IGeolocationState } from "./hooks/useGeolocation.ts";
+import type { IGeolocationState } from "./features/geolocation/types/gpsTypes.ts";
 import type { IStoredState } from "./types.ts";
 
 export interface IAppContext {
