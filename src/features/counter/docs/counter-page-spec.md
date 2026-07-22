@@ -4,6 +4,8 @@
 
 手機優先、快速人工計數；整頁固定 `100dvh`。
 
+頁面只組合版面；計數互動由 hook 管理，事件建構與 Save 交易分別位於 utils 與 services。
+
 ## 布局
 
 - 經典：七車種 2×4／橫向 3×3。
@@ -26,6 +28,7 @@
 - 增加成功：套用 `feedbackSettings.increase`。
 - 減少成功：套用 `feedbackSettings.decrease`。
 - 工作區為 0 仍減少：不寫入紀錄，套用 `feedbackSettings.negativeError` 並顯示警告。
+- 計數事件只複製 `useGeolocation` 提供的 70 秒內快取；按鈕事件不得直接呼叫 Geolocation API。
 
 ## Quick Save／Auto Save
 
